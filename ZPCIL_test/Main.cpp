@@ -4,6 +4,7 @@
 //#include <fstream>
 //#include <corecrt.h>
 #include "DRM.h"
+#include "VYVDR.h"
 //#include "VYVDR.h"
 //#include "CILEV.h"
 
@@ -21,8 +22,7 @@ int main()
 {
 
     DRM();
-	cout << "ZP: IR = " << IR << endl;
-	cout << "ZP: L = " << L << endl;
+	VYVDR();
 
 	return(0);
 }
