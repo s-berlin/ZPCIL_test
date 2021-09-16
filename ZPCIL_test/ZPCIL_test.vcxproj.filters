@@ -26,5 +26,11 @@
     <ClInclude Include="VYVDR.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="VYVODS.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="DSR.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

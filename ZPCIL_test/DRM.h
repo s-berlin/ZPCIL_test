@@ -22,9 +22,6 @@ void DRM()
 	int i = 0;
 	fstream fi;
 
-	//	float WH;      // ресурс, часов
-	//    float T1R, TMAX;     // момент на вход€щем валу, Ќм
-
 	cout << "DRM" << endl;
 
 	fi.open("FILE1", fstream::in);

@@ -143,6 +143,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DRM.h" />
+    <ClInclude Include="DSR.h" />
+    <ClInclude Include="VYVODS.h" />
     <ClInclude Include="VYVDR.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
