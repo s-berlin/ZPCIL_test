@@ -32,5 +32,11 @@
     <ClInclude Include="DSR.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="ZPGR.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="ZPRGMS.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

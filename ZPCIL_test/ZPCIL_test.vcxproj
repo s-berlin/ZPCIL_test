@@ -144,6 +144,8 @@
   <ItemGroup>
     <ClInclude Include="DRM.h" />
     <ClInclude Include="DSR.h" />
+    <ClInclude Include="ZPRGMS.h" />
+    <ClInclude Include="ZPGR.h" />
     <ClInclude Include="VYVODS.h" />
     <ClInclude Include="VYVDR.h" />
   </ItemGroup>
