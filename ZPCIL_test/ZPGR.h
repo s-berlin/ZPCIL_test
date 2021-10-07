@@ -8,9 +8,7 @@
 
 using namespace std;
 
-extern float AL;
-
-void ZPGR()
+float ZPGR(float AL)
 {
     cout << "ZPGR: AL =" << AL << endl;
     int K = AL;
@@ -27,6 +25,7 @@ void ZPGR()
 
     AL = (K + (N + AS / 60. * 100.) / 60.) * 0.017453292;
     cout << "ZPGR: AL =" << AL << endl;
+    return AL;
 }
 
 /*

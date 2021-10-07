@@ -139,11 +139,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="ZPCIL.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ARC.h" />
+    <ClInclude Include="CNT1.h" />
+    <ClInclude Include="DOP1L.h" />
     <ClInclude Include="DRM.h" />
     <ClInclude Include="DSR.h" />
+    <ClInclude Include="CILEV.h" />
+    <ClInclude Include="GEOM.h" />
+    <ClInclude Include="DXS.h" />
+    <ClInclude Include="DXS_ext.h" />
+    <ClInclude Include="SCT.h" />
     <ClInclude Include="ZPRGMS.h" />
     <ClInclude Include="ZPGR.h" />
     <ClInclude Include="VYVODS.h" />

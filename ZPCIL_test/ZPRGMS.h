@@ -8,11 +8,7 @@
 
 using namespace std;
 
-extern float AL;
-extern float GRM;
-extern int SEC;
-
-void ZPRGMS()
+void ZPRGMS(float AL, float &GRM, int &SEC)
 {
     // AL   - угол в радианах
     // GRM - Град.Мин угла
