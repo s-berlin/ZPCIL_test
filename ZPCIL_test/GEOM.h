@@ -6,6 +6,7 @@
 #include "ARC.h"
 #include "DXS.h"
 #include "CNT1.h"
+#include "DOP1L.h"
 
 using namespace std;
 
@@ -51,7 +52,10 @@ void GEOM(int NW)
     float XMIN[2] = {}, XMINR[2] = {}, BETA[2] = {}, SNA[2] = {};
     float DU[2] = {}, TGAU[2] = {}, ROW[2] = {}, TGAV[2] = {}, DV[2] = {}, RL[2] = {};
     float SC[2] = {}, ROS[2] = {}, DS[2] = {}, HH[2] = {};
-    float DY[2], TGALY = 0, STY = 0, CSBY, PSIYV = 0, SY[2] = {}, HAY[2] = {};
+    float DY[2] = {}, TGALY = 0, STY = 0, CSBY, PSIYV = 0, SY[2] = {}, HAY[2] = {};
+    float FR[2] = {}, TH[2] = {}, TWM[2] = {}, TW[2] = {}, ECS[2] = {}, TC_[2] = {}, EHS[2] = {};
+    float EWS1[2] = {}, EWS2[2] = {}, EWS[2] = {};
+    float DLTHMN[2] = {}, DLTHMX[2] = {};
 
     float EPBET, EPGAM, BETB, EPAM;
     float PI = 3.1415927;
@@ -364,14 +368,37 @@ void GEOM(int NW)
             STY = DY[i] * ((PI / 2 + 2 * X[i] * TGAL) / Z[i] + INVAT - (TGALY - atan(TGALY)));
             CSBY = 1 / sqrt(1 + (DY[i] * TGB / D[i]) * (DY[i] * TGB / D[i]));
             PSIYV = STY * CSBY * CSBY * CSBY / DY[i];
-            SY[i] = DY[i] * sin(PSIYV) / CSBY * CSBY;
-            HAY[i] = 0.5 * (DA[i] - DY[i] + DY[i] * (1 - cos(PSIYV)) / CSBY * CSBY);
+            SY[i] = DY[i] * sin(PSIYV) / (CSBY * CSBY);
+            HAY[i] = 0.5 * (DA[i] - DY[i] + DY[i] * (1 - cos(PSIYV)) / (CSBY * CSBY));
         }
         
         if (IPR >= 3) {
-            f_1 << "\nÒÎËÙÈÍÀ ÏÎ ÕÎÐÄÅ ÇÓÁÀ ÄÅËÈÒÅËÜÍÀß     S     " << round(SY[0] * 1000) / 1000 << "    " << round(SY[1] * 1000) / 1000;    // 5.099    4.119  âìåñòî   5.274   4.261 ???
-            f_1 << "\nÂÛÑÎÒÀ ÄÎ ÕÎÐÄÛ ÇÓÁÀ ÄÅËÈÒÅËÜÍÀß     HA     " << round(HAY[0] * 1000) / 1000 << "    " << round(HAY[1] * 1000) / 1000;  // ïîëó÷èëèñü çíà÷åíèÿ íà 0.001 ìåíüøèå
+            f_1 << "\nÒÎËÙÈÍÀ ÏÎ ÕÎÐÄÅ ÇÓÁÀ ÄÅËÈÒÅËÜÍÀß     S     " << round(SY[0] * 1000) / 1000 << "    " << round(SY[1] * 1000) / 1000;    
+            f_1 << "\nÂÛÑÎÒÀ ÄÎ ÕÎÐÄÛ ÇÓÁÀ ÄÅËÈÒÅËÜÍÀß     HA     " << round(HAY[0] * 1000) / 1000 << "    " << round(HAY[1] * 1000) / 1000 << endl;  // ïîëó÷èëèñü çíà÷åíèÿ íà 0.001 ìåíüøèå
         }
+
+        int KST4 = IST4;
+        int KST5 = IST5;
+        
+        DOP1L(MN, D, KST, KST4, KST5, FR, EHS, TH, EWS1, EWS2, EWS, TWM, TW, ECS, TC_);
+        
+        cout << "D = " << D[0] << "    " << D[1] << endl;
+        cout << "DLTH = " << DLTH[0] << "    " << DLTH[1] << endl;
+        cout << "EHS = " << EHS[0] << "    " << EHS[1] << endl;
+        cout << "TH = " << TH[0] << "    " << TH[1] << endl;
+
+        for (int i = 0; i < 2; i++) {
+
+            DLTHMN[i] = -DLTH[i] - EHS[i];
+            DLTHMX[i] = DLTHMN[i] + TH[i];
+        }
+        if (IPR >= 3) { //WRITE(1, 219) DLTHMN, DLTHMX
+            f_1 << "\nÏÐÅÄÅËÜÍÛÅ ÏÎÊÀÇÀÍÈß ÒÀÍÃÅÍ- ";
+            f_1 << "\nÖÈÀËÜÍÎÃÎ ÇÓÁÎÌÅÐÀ                 DLTH   " << round(DLTHMN[0] * 1000) / 1000 << "       " << round(DLTHMN[1] * 1000) / 1000;  // 0.8    0.9    âìåñòî   0.2      0.25
+            f_1 << "\n                                          " << round(DLTHMX[0] * 1000) / 1000 << "       " << round(DLTHMX[1] * 1000) / 1000;  // 1.7    1.8             0.6      0.65
+        }
+
+
         /*
   DO 37 I = 1, 2
         C      DY(I) = DA(I) - 2 * M
@@ -380,6 +407,7 @@ void GEOM(int NW)
         STY = DY(I) * ((PI / 2 + 2 * X(I) * TGAL) / Z(I) +
             *INVAT - (TGALY - ATAN(TGALY)))
         CSBY = 1 / SQRT(1 + (DY(I) * TGB / D(I)) * *2)
+
         PSIYV = STY * CSBY * *3 / DY(I)
         SY(I) = DY(I) * SIN(PSIYV) / CSBY * *2
         HAY(I) = 0.5 * (DA(I) - DY(I) + DY(I) *
