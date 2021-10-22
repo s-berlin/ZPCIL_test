@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <string>
+#include <iomanip>
 
 using namespace std;
 
@@ -54,7 +55,7 @@ void VYVDR()
     sprintf(FILNAM, "RESULT%d", IS);
     f_1.open(FILNAM, fstream::out);
     
-    if (IS = 1)
+    if (IS == 1)
     {
         f_1 << IR;
         f_1 << "\n" <<"                     ÐÀÑ×ÅÒ ÇÓÁ×ÀÒÛÕ ÏÅÐÅÄÀ× ÐÅÄÓÊÒÎÐÀ\n\n";
@@ -92,8 +93,8 @@ void VYVDR()
 
         f_1 << "\nÌÀÊÑÈÌÀËÜÍÛÉ ÊÐÓÒßÙÈÉ ÌÎÌÅÍÒ ÍÀ ÂÅÄÓÙÅÌ\n ÂÀËÓ ÐÅÄÓÊÒÎÐÀ, Í*ì                    TMAX   " << TMAX;
 
-        f_1 << "\nÏÐÈÇÍÀÊ ÂÛÂÎÄÀ ÐÅÇÓËÜÒÀÒÎÂ ÐÀÑ×ÅÒÀ       IPR   " << IPR;
-        f_1 << "\n×ÈÑËÎ ÑÒÓÏÅÍÅÉ ÐÅÄÓÊÒÎÐÀ                 ISR   " << ISR;
+        f_1 << "\nÏÐÈÇÍÀÊ ÂÛÂÎÄÀ ÐÅÇÓËÜÒÀÒÎÂ ÐÀÑ×ÅÒÀ       IPR   " << setw(6) << IPR;
+        f_1 << "\n×ÈÑËÎ ÑÒÓÏÅÍÅÉ ÐÅÄÓÊÒÎÐÀ                 ISR   " << setw(4) << ISR;
 
     }
 

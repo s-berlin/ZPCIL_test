@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <string>
+#include <string>
 #include "DSR.h"
 #include "VYVODS.h"
 #include "GEOM.h"

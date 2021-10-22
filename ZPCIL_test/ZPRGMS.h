@@ -16,20 +16,20 @@ void ZPRGMS(float AL, float &GRM, int &SEC)
 
     cout << "ZPRGMS: AL =" << AL << endl;
 
-    GRM = AL * 57.295779;
+    GRM = static_cast<float>(AL * 57.295779);
 
-    int K = GRM;
-    float A = (GRM - K) * 60.;
+    int K = static_cast<int>(GRM);
+    float A = static_cast<float>((GRM - K) * 60.);
     cout << "ZPRGMS: GRM = " << GRM << "     K = " << K << "     A = " << A << endl;
 
-    int N = A;
-    SEC = (A - N) * 60 + 0.5;
+    int N = static_cast<int>(A);
+    SEC = static_cast<int>((A - N) * 60 + 0.5);
     cout << "ZPRGMS: N = " << N << "     SEC = " << SEC << endl;
 
     if (SEC >= 60) { SEC = 0; N = N + 1; }
     if (N >= 60) { N = 0; K = K + 1; }
 
-    GRM = K + 0.01 * N;
+    GRM = static_cast<float>(K + 0.01 * N);
 
     cout << "ZPRGMS: GRM = " << GRM << "   SEC = " << SEC << endl;
 }

@@ -11,20 +11,21 @@ using namespace std;
 float ZPGR(float AL)
 {
     cout << "ZPGR: AL =" << AL << endl;
-    int K = AL;
+    int K = (int)AL;
     float A = (AL - K) * 100;
     cout << "ZPGR: K =" << K << "    A =" << A << endl;
 
     if (A >= 60) { A = 0; K = K + 1;}
 
-    int N = A;
+    int N = (int) A;
     float AS = A - N;
     cout << "ZPGR: N =" << N << "    AS =" << AS << endl;
     
     if (AS >= 60) { AS = 0; N = N + 1;}
 
-    AL = (K + (N + AS / 60. * 100.) / 60.) * 0.017453292;
-    cout << "ZPGR: AL =" << AL << endl;
+    double AL_d = (K + (N + AS / 60. * 100.) / 60.) * 0.017453292; 
+    AL = static_cast<float>(AL_d); 
+    cout << "ZPGR: AL = " << AL << endl;
     return AL;
 }
 

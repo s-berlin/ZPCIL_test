@@ -1,8 +1,8 @@
 void DXSP(float XS, float X[2])
 {
 	if (XS > 0) {
-		X[0] = XS * 0.5;
-		X[1] = XS * 0.5;
+		X[0] = static_cast<float>(XS * 0.5);
+		X[1] = static_cast<float>(XS * 0.5);
 	}
 	else {
 		X[0] = XS;
@@ -26,11 +26,11 @@ void DXS1(float FX[2], float FXS)
 {
 	if (FXS > 1.5) {
 		FX[0] = 0.75;
-		FX[1] = FXS - 0.75;
+		FX[1] = static_cast<float>(FXS - 0.75);
 	}
 	else {
 		FX[0] = 0.5;
-		FX[1] = FXS - 0.5;
+		FX[1] = static_cast<float>(FXS - 0.5);
 	}
 };
 /*

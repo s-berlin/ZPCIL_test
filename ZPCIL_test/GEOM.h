@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <fstream>
 #include <string>
+#include <iomanip>
 #include "SCT.h"
 #include "ARC.h"
 #include "DXS.h"
@@ -58,15 +59,16 @@ void GEOM(int NW)
     float DLTHMN[2] = {}, DLTHMX[2] = {};
 
     float EPBET, EPGAM, BETB, EPAM;
-    float PI = 3.1415927;
+    double PI = 3.1415927;
     int KST[3] = {0,0,0};
     float Z[2] = {0,0}, X[2] = {0,0};
     float ALF = 0;
     float SNAL = 0, CSAL = 0, TGAL = 0, SNB = 0, CSB = 0, TGB = 0, SNAT = 0, CSAT = 0, TGAT = 0;
     float UU = 0;
-    int I12 = 0, iZNR = 0, IIW1 = 0, IIW2 = 0;
+    int I12 = 0, iZNR = 0, IIW1 = 0, IIW2 = 0, IDXS = 0;
     float XS = 0;
-    float ALFTW = 0, SNATW = 0, CSATW = 0, TGATW = 0;
+    float SNATW = 0, CSATW = 0, TGATW = 0;
+    float ALFTW = 0;
 
     cout << "\nGEOM" << endl;
 
@@ -90,8 +92,8 @@ void GEOM(int NW)
     //  ÏÀÐÀÌÅÒÐÛ ÈÑÕÎÄÍÎÃÎ ÊÎÍÒÓÐÀ  ÃÎÑÒ 13755 - 81
     //      HLZV = 2. * HAZV
     //      CZV = 0.25
-    float HGZV = 0.2;
-    float DELZV = 0.02;
+    float HGZV = static_cast<float>(0.2);
+    float DELZV = static_cast<float>(0.02);
     if (IMD == 0) DELZV = 0.;
     
     f_1 << "\n\n\n                     ÐÀÑ×ÅÒ ÃÅÎÌÅÒÐÈÈ ÏÎ ÃÎÑÒ 16532-70" << endl;
@@ -105,8 +107,8 @@ void GEOM(int NW)
     SCT(ALFT, SNAT, CSAT, TGAT);
     float INVAT = TGAT - ALFT;
     float ZS = Z[0] + Z[1];
-    float A = 0.5 * ZS * MN / CSB;
-    float U = 1. * Z[1] / Z[0];
+    float A = static_cast<float>(0.5 * ZS * MN / CSB);
+    float U = static_cast<float>(1. * Z[1] / Z[0]);
     cout << "\nGEOM: TGAL, ALFT, INVAT, ZS, A, MN, CSB, U = " << TGAL << ", " << ALFT << ", " << INVAT << ", " << ZS << ", " << A << ", " << MN << ", " << CSB << ", " << U << endl;
 
     f_1 << "\n       ÎÑÍÎÂÍÛÅ ÃÅÎÌÅÒÐÈ×ÅÑÊÈÅ ÏÀÐÀÌÅÒÐÛ" << endl;
@@ -117,19 +119,19 @@ void GEOM(int NW)
         f_1 << "                                          ØÅÑÒÅÐÍß  ÊÎËÅÑÎ" << endl;
         }
     else {
-        UU = 1. / U;
+        UU = static_cast<float>(1. / U);
         I12 = 1;                 //ìóëüòèïëèêàòîð
         f_1 << "                                          ÊÎËÅÑÎ  ØÅÑÒÅÐÍß" << endl;
     }
     
     if (AW == 0) {
         XS = X[0] + X[1];
-        float INVATW = (2. * XS * TGAL) / ZS + INVAT;
+        float INVATW = static_cast<float>((2. * XS * TGAL) / ZS + INVAT);
 
         ARC(INVATW, ALFTW);
-        cout << "\nGEOM: INVATW, ALFTW =" << INVATW << ", " << ALFTW << endl;
+        cout << "\nGEOM: INVATW, ALFTW =" << INVATW << ", " << ALFTW << "           GEOM: sizeof(ALFTW) =" << sizeof(ALFTW) << endl;
         SCT(ALFTW, SNATW, CSATW, TGATW);
-        AW = ZS * MN * CSAT / (2. * CSB * CSATW);
+        AW = static_cast<float>(ZS * MN * CSAT / (2. * CSB * CSATW));
         
         f_1 <<     "\nÌÅÆÎÑÅÂÎÅ ÐÀÑÑÒÎßÍÈÅ                       AW      " << AW;
 
@@ -143,10 +145,10 @@ void GEOM(int NW)
         CSATW = A * CSAT / AW;
         cout << "\nGEOM: A, CSATW = " << A << "  " << CSATW << endl;
         SNATW = sqrt(1 - CSATW * CSATW);
-        TGATW = SNATW / CSATW;
+        TGATW = static_cast<float>(SNATW / CSATW);
         float INVATW = TGATW - atan(TGATW);
-        XS = ZS * (INVATW - INVAT) * 0.5 / TGAL;
-        int IDXS = 0;
+        XS = static_cast<float>(ZS * (INVATW - INVAT) * 0.5 / TGAL);
+        IDXS = 0;
         cout << "\nGEOM: XS = " << XS << endl;
 
         if (flaw == 0) f_1 << "\nÌÅÆÎÑÅÂÎÅ ÐÀÑÑÒÎßÍÈÅ                 AW       " << AW;
@@ -185,9 +187,9 @@ void GEOM(int NW)
    
     }
     if (U >= 1) {
-        DW[0] = 2. * AW / (U + 1.);
-        DW[1] = 2. * AW * U / (U + 1.);
-        A = 0.5 * ZS * MN / CSB;
+        DW[0] = static_cast<float>(2. * AW / (U + 1.));
+        DW[1] = static_cast<float>(2. * AW * U / (U + 1.));
+        A = static_cast<float>(0.5 * ZS * MN / CSB);
         float Y = (AW - A) / MN;
         float DELY = XS - Y;
 
@@ -199,7 +201,7 @@ void GEOM(int NW)
 
             DLTH[i] = DELY * MN;
             TGAA[i] = sqrt(DA[i] * DA[i] - DB[i] * DB[i]) / DB[i];
-            EA[i] = Z[i] * (TGAA[i] - TGATW) / (2 * PI);
+            EA[i] = static_cast<float>((Z[i] * (TGAA[i] - TGATW) / (2 * PI)));
             HZ = (DA[i] - DF[i]) / 2;
         }
         f_1 << "\nÄÅËÈÒÅËÜÍÛÅ ÄÈÀÌÅÒÐÛ                  D  " << D[0] << "    " << D[1];
@@ -207,20 +209,20 @@ void GEOM(int NW)
         f_1 << "\nÄÈÀÌÅÒÐÛ ÂÅÐØÈÍ                      DA  " << DA[0] << "    " << DA[1];
         f_1 << "\nÄÈÀÌÅÒÐÛ ÂÏÀÄÈÍ                      DF  " << DF[0] << "    " << DF[1];
         
-        float DELZV = 0.02;
+        float DELZV = static_cast<float>(0.02);
         if (IMD == 0) DELZV = 0;
 
         for (int i = 0; i < 2; i++) {
             if (DELZV != 0) {
-                ROG[i] = 0.5 * D[i] * SNAT + (HA - HGZV + X[i]) * MN / SNAT;
+                ROG[i] = static_cast<float>(0.5 * D[i] * SNAT + (HA - HGZV + X[i]) * MN / SNAT);
                 TGAG[i] = ROG[i] / DB[i] * 2;
             }
-            ROL[i] = 0.5 * D[i] * SNAT - (HL - HA - X[i]) * MN / SNAT;
-            ROP[1-i] = AW * SNATW - 0.5 * DB[i] * TGAA[i];
+            ROL[i] = static_cast<float>(0.5 * D[i] * SNAT - (HL - HA - X[i]) * MN / SNAT);
+            ROP[1-i] = static_cast<float>(AW * SNATW - 0.5 * DB[i] * TGAA[i]);
         }
 
         if (IVP >= 2 && IVP <= 4) {
-            float RLA = 2 * AW * sin(PI / NW);
+            float RLA = static_cast<float>(2 * AW * sin(PI / NW));
             if (DA[1] >= RLA) {
                 f_1 << "\nÍàðóøåíî óñëîâèå ñîñåäñòâà: (Da)g < 2*Aw*sin(3.14/nw)  " << endl;
                 f_1 << "\n   (Da)g = " << DA[1] << "  2*Aw*sin(3.14/nw) = "  << RLA;
@@ -238,7 +240,7 @@ void GEOM(int NW)
         for (int i = 0; i < 2; i++) {
             float CSBA = 1 / sqrt(1 + (DA[i] * TGB / D[i]) * (DA[i] * TGB / D[i]));
             BETA[i] = acos(CSBA);
-            SNA[i] = (DA[i] * ((PI / 2 + 2 * X[i] * TGAL) / Z[i] + INVAT - (TGAA[i] - atan(TGAA[i]))) * CSBA) / MN;
+            SNA[i] = static_cast<float>((DA[i] * ((PI / 2 + 2 * X[i] * TGAL) / Z[i] + INVAT - (TGAA[i] - atan(TGAA[i]))) * CSBA) / MN);
         }
 
         if (SNA[0] <= 0 && IPR > 6) f_1 << "\n   ÇAOCTPEHÈE ÇÓÁÀ ØÅÑÒÅÐÍÈ   SNA1 = " << SNA[0];
@@ -257,17 +259,17 @@ void GEOM(int NW)
         if (IPR >= 3) f_1 << "\nÊÎÝÔÔ. ÒÎÐÖÎÂÎÃÎ ÏÅÐÅÊÐÛÒÈß       EPALF      " << EPALF;
         
         for (int i = 0; i < 2; i++) {
-            float ROU = ROP[i] + PI * MN * CSAL;
+            float ROU = static_cast<float>(ROP[i] + PI * MN * CSAL);
             DU[i] = sqrt(DB[i] * DB[i] + 4 * ROU * ROU);
             TGAU[i] = 2 * ROU / DB[i];
-            ROW[i] = 0.5 * DW[i] * SNATW;
+            ROW[i] = static_cast<float>(0.5 * DW[i] * SNATW);
             TGAV[1 - i] = 2 * (AW * SNATW - ROU) / DB[1 - i];
             DV[1 - i] = DB[1 - i] / cos(atan(TGAV[1 - i]));
-            RL[i] = 0.5 * DB[i] * (TGAA[i] - TGATW) / (2 * PI);
+            RL[i] = static_cast<float>(0.5 * DB[i] * static_cast<float>(TGAA[i] - TGATW) / (2 * PI));
         }
 
         if (BE != 0) {
-            EPBET = BW / (PI * MN / SNB);
+            EPBET = static_cast<float>(BW / (PI * MN / SNB));
             EPGAM = EPBET + EPALF;
             BETB = atan(SNB * CSAL / sqrt(1 - (SNB * CSAL) * (SNB * CSAL)));
             if (BE != 0 && EPBET >= 1 && IPR >= 3)  f_1 << "\nÊÎÝÔÔ. ÎÑÅÂÎÃÎ ÏÅÐÅÊÐÛÒÈß         EPBET      " << EPBET;
@@ -277,7 +279,7 @@ void GEOM(int NW)
         if (BE == 0) {
             BETB = 0;
             if (DELZV != 0) {
-                EPAM = (Z[0] * TGAG[0] + Z[1] * TGAG[1] - ZS * TGATW) / 2 / PI;
+                EPAM = static_cast<float>((Z[0] * TGAG[0] + Z[1] * TGAG[1] - ZS * TGATW) / 2 / PI);
                 if (IPR >= 3) {
                     f_1 << "\n×ÀÑÒÜ ÊÎÝÔÔ. ÒÎÐÖÎÂÎÃÎ ÏÅÐÅÊÐÛÒÈß";
                     f_1 << "\nÏÐÈ ÌÎÄÈÔÈÊÀÖÈÈ ÏÐÎÔÈËß ÇÓÁÜÅÂ     EPAM " << EPAM;
@@ -291,10 +293,10 @@ void GEOM(int NW)
         cout << "GEOM: II = " << II << endl;  // îðãàíèçîâàòü ïðåðûâûâàíèå, åñëè II == 3:    IF(II.EQ.3)  GOTO 61
         
         for (int i = 0; i < 2; i++) {
-            SC[i] = (PI * CSAL * CSAL / 2 + X[i] * sin(2 * ALF)) * MN;
-            ROS[i] = 0.5 * (DB[i] * TGAT + SC[i] * cos(BETB) / CSAL);
+            SC[i] = static_cast<float>((PI * CSAL * CSAL / 2 + X[i] * sin(2 * ALF)) * MN);
+            ROS[i] = static_cast<float>(0.5 * (DB[i] * TGAT + SC[i] * cos(BETB) / CSAL));
             DS[i] = sqrt(DB[i] * DB[i] + 4 * ROS[i] * ROS[i]);
-            HH[i] = 0.5 * (DA[i] - D[i] - SC[i] * TGAL);
+            HH[i] = static_cast<float>(0.5 * (DA[i] - D[i] - SC[i] * TGAL));
         }
         if (IPR >= 3) {
             f_1 << "\n\n      ÇÓÁÎÌÅÐÍÛÅ ÏÀÐÀÌÅÒÐÛ" << endl;
@@ -308,15 +310,15 @@ void GEOM(int NW)
             if (CSALX >= 1) ZN[i] = 3;
 
             if (CSALX < 1) {
-                float ZNR = Z[i] / PI * (sqrt(1 - CSALX * CSALX) / CSALX / cos(BETB) - 2 * X[i] * TGAL / Z[i] - INVAT) + 0.5;
-                iZNR = ZNR;
-                float TB = ZNR - iZNR;  // AINT() - óñå÷åíèå - öåëàÿ ÷àñòü?
-                if (TB < 0.5) ZN[i] = iZNR;
-                if (TB >= 0.5) ZN[i] = iZNR + 1;
+                double ZNR = Z[i] / PI * (sqrt(1 - CSALX * CSALX) / CSALX / cos(BETB) - 2 * X[i] * TGAL / Z[i] - INVAT) + 0.5;
+                iZNR = static_cast<int>(ZNR);
+                double TB = ZNR - iZNR;  // AINT() - óñå÷åíèå - öåëàÿ ÷àñòü?
+                if (TB < 0.5) ZN[i] = static_cast<float>(iZNR);
+                if (TB >= 0.5) ZN[i] = static_cast<float>(iZNR + 1);
             }            
             
-     m32:   W[i] = (PI * (ZN[i] - 0.5) + 2 * X[i] * TGAL + Z[i] * INVAT) * MN * CSAL;
-            ROWN[i] = 0.5 * W[i] * cos(BETB);
+     m32:   W[i] = static_cast<float>((PI * (ZN[i] - 0.5) + 2 * X[i] * TGAL + Z[i] * INVAT) * MN * CSAL);
+            ROWN[i] = static_cast<float>(0.5 * W[i] * cos(BETB));
             DWN[i] = sqrt(DB[i] * DB[i] + 4 * ROWN[i] * ROWN[i]);
             
             if (DWN[i] >= DA[i]) {
@@ -365,11 +367,11 @@ void GEOM(int NW)
         for (int i = 0; i < 2; i++) {
             DY[i] = D[i];
             TGALY = sqrt(DY[i] * DY[i] - DB[i] * DB[i]) / DB[i];
-            STY = DY[i] * ((PI / 2 + 2 * X[i] * TGAL) / Z[i] + INVAT - (TGALY - atan(TGALY)));
-            CSBY = 1 / sqrt(1 + (DY[i] * TGB / D[i]) * (DY[i] * TGB / D[i]));
-            PSIYV = STY * CSBY * CSBY * CSBY / DY[i];
-            SY[i] = DY[i] * sin(PSIYV) / (CSBY * CSBY);
-            HAY[i] = 0.5 * (DA[i] - DY[i] + DY[i] * (1 - cos(PSIYV)) / (CSBY * CSBY));
+            STY = static_cast<float>(DY[i] * ((PI / 2 + 2 * X[i] * TGAL) / Z[i] + INVAT - (TGALY - atan(TGALY))));
+            CSBY = static_cast<float>(1 / sqrt(1 + (DY[i] * TGB / D[i]) * (DY[i] * TGB / D[i])));
+            PSIYV = static_cast<float>(STY * CSBY * CSBY * CSBY / DY[i]);
+            SY[i] = static_cast<float>(DY[i] * sin(PSIYV) / (CSBY * CSBY));
+            HAY[i] = static_cast<float>(0.5 * (DA[i] - DY[i] + DY[i] * (1 - cos(PSIYV)) / (CSBY * CSBY)));
         }
         
         if (IPR >= 3) {
@@ -394,11 +396,17 @@ void GEOM(int NW)
         }
         if (IPR >= 3) { //WRITE(1, 219) DLTHMN, DLTHMX
             f_1 << "\nÏÐÅÄÅËÜÍÛÅ ÏÎÊÀÇÀÍÈß ÒÀÍÃÅÍ- ";
-            f_1 << "\nÖÈÀËÜÍÎÃÎ ÇÓÁÎÌÅÐÀ                 DLTH   " << round(DLTHMN[0] * 1000) / 1000 << "       " << round(DLTHMN[1] * 1000) / 1000;  // 0.8    0.9    âìåñòî   0.2      0.25
-            f_1 << "\n                                          " << round(DLTHMX[0] * 1000) / 1000 << "       " << round(DLTHMX[1] * 1000) / 1000;  // 1.7    1.8             0.6      0.65
+            f_1 << "\nÖÈÀËÜÍÎÃÎ ÇÓÁÎÌÅÐÀ                 DLTH   " << round(DLTHMN[0] * 1000) / 1000 << "       " << round(DLTHMN[1] * 1000) / 1000;  // 0.2    0.25    âìåñòî   0.2      0.25
+            f_1 << "\n                                          " << round(DLTHMX[0] * 1000) / 1000 << "       " << round(DLTHMX[1] * 1000) / 1000;  // 0.65    0.7             0.6      0.65
         }
 
-
+        if (IDXS == 1 && BE != 0 && IPR > 6) {
+            f_1 << "\nÊÎÝÔ.ÑÓÌÌÛ ÑÌÅÙÅÍÈÉ ÂÍÅ ÐÅÊÎÌÅÍÄÓÅÌÛÕ ÏÐÅÄÅËÎÂ";
+            f_1 << "\n ÎÒ -0.5 ÄÎ 0.5     XS = " << setw(6) << XS;
+            f_1 << "\n ÐÅÊÎÌÅÍÄÓÅÒÑß ÈÇÌÅÍÈÒÜ ÏÀÐÀÌÅÒÐÛ ÏÅÐÅÄÀ×È";
+            f_1 << "\n (×ÈÑËÎ ÇÓÁÜÅÂ,ÓÃÎË ÍÀÊËÎÍÀ)";
+        
+        }
         /*
   DO 37 I = 1, 2
         C      DY(I) = DA(I) - 2 * M

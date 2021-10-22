@@ -1,9 +1,10 @@
 #include <iostream>
 #include <fstream>
+#include <string>
+#include <iomanip>
 #include <stdlib.h>
 #include <stdio.h>
 #include <corecrt.h>
-#include <string>
 #include "ZPGR.h"
 #include "ZPRGMS.h"
 
@@ -52,7 +53,7 @@ void  VYVODS()
     char KT5[8] = { 'x', 'y', 'z', 'a', 'b', 'c', 'd', 'h'};
     string IE2[2]{ " Mœ‡     ", "Í„Ò/Í‚.ÏÏ" };
     int I2 = 0;
-    if (IE = 2) I2 = 1;
+    if (IE == 2) I2 = 1;
 
     cout << "VYVODS" << endl;
 
@@ -82,9 +83,9 @@ void  VYVODS()
     f_1 << "\n Œ›‘‘. ¬€—Œ“€ √ŒÀŒ¬ » «”¡¿             HA      " << HA;
     f_1 << "\nÕ¿À»◊»≈ ÃŒƒ»‘» ¿÷»» √ŒÀŒ¬ » «”¡¿       IMD     " << KM[IMD];  //IM ÌÂ ‡‚ÌÓ IMD !!! „‰Â Á‡‰‡ÂÚÒˇ IM ?????
     if(IST1 == IST2 && IST1 == IST3)
-    f_1 << "\n—“≈œ≈Õ‹ “Œ◊ÕŒ—“» œŒ √Œ—“ 1643-81       IST     " << IST1 << KT[IST4] << " - " << KT5[IST5];
+    f_1 << "\n—“≈œ≈Õ‹ “Œ◊ÕŒ—“» œŒ √Œ—“ 1643-81       IST     " << IST1 << KT[IST4-1] << " - " << KT5[IST5-1];
     else
-    f_1 << "\n—“≈œ≈Õ‹ “Œ◊ÕŒ—“» œŒ √Œ—“ 1643-81       IST     " << IST1 << " - " << IST2 << " - " << IST3 << KT[IST4] << " - " << KT5[IST5];
+    f_1 << "\n—“≈œ≈Õ‹ “Œ◊ÕŒ—“» œŒ √Œ—“ 1643-81       IST     " << IST1 << " - " << IST2 << " - " << IST3 << KT[IST4-1] << " - " << KT5[IST5-1];
 
     if (IMD == 0 && HA == 1 && AL == 20)
         f_1 << "\n»—’ŒƒÕ€…  ŒÕ“”– œŒ √Œ—“ 13755-81\n (¡≈« ÃŒƒ»‘» ¿÷»» œ–Œ‘»Àﬂ)";
@@ -170,14 +171,14 @@ void  VYVODS()
                 f_1 << "\n«”¡¿ Ã¿ —»Ã¿À‹ÕŒ… Õ¿√–”« Œ… " << IE2[I2] << "  SGFPM   " << SFPM1 << "    " << SFPM2;
             }
             if (IE == 2) {
-                SHLM1 = SHLM1 * 9.81;
-                SHLM2 = SHLM2 * 9.81;
-                SHPM1 = SHPM1 * 9.81;
-                SHPM2 = SHPM2 * 9.81;
-                SFLB1 = SFLB1 * 9.81;
-                SFLB2 = SFLB2 * 9.81;
-                SFPM1 = SFPM1 * 9.81;
-                SFPM2 = SFPM2 * 9.81;
+                SHLM1 = static_cast<float>(SHLM1 * 9.81);
+                SHLM2 = static_cast<float>(SHLM2 * 9.81);
+                SHPM1 = static_cast<float>(SHPM1 * 9.81);
+                SHPM2 = static_cast<float>(SHPM2 * 9.81);
+                SFLB1 = static_cast<float>(SFLB1 * 9.81);
+                SFLB2 = static_cast<float>(SFLB2 * 9.81);
+                SFPM1 = static_cast<float>(SFPM1 * 9.81);
+                SFPM2 = static_cast<float>(SFPM2 * 9.81);
             }
             if (IPR >=3 ) f_1 << "\n___________________";
         }
