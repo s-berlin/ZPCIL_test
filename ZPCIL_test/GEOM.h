@@ -8,6 +8,8 @@
 #include "DXS.h"
 #include "CNT1.h"
 #include "DOP1L.h"
+#include "RKP.h"
+#include "DGKP.h"
 
 using namespace std;
 
@@ -69,6 +71,10 @@ void GEOM(int NW)
     float XS = 0;
     float SNATW = 0, CSATW = 0, TGATW = 0;
     float ALFTW = 0;
+    float RLM = 0, RLMIN = 0, RKEPS = 0;
+    float PX = 0, PALF = 0;
+    float TETP[2] = {}, TETV[2] = {}, DZTP[2] = {}, DZTV[2] = {};
+
 
     cout << "\nGEOM" << endl;
 
@@ -397,7 +403,7 @@ void GEOM(int NW)
         if (IPR >= 3) { //WRITE(1, 219) DLTHMN, DLTHMX
             f_1 << "\nÏÐÅÄÅËÜÍÛÅ ÏÎÊÀÇÀÍÈß ÒÀÍÃÅÍ- ";
             f_1 << "\nÖÈÀËÜÍÎÃÎ ÇÓÁÎÌÅÐÀ                 DLTH   " << round(DLTHMN[0] * 1000) / 1000 << "       " << round(DLTHMN[1] * 1000) / 1000;  // 0.2    0.25    âìåñòî   0.2      0.25
-            f_1 << "\n                                          " << round(DLTHMX[0] * 1000) / 1000 << "       " << round(DLTHMX[1] * 1000) / 1000;  // 0.65    0.7             0.6      0.65
+            f_1 << "\n                                          " << round(DLTHMX[0] * 1000) / 1000 << "       " << round(DLTHMX[1] * 1000) / 1000;  // 0.4    0.45             0.6      0.65
         }
 
         if (IDXS == 1 && BE != 0 && IPR > 6) {
@@ -407,44 +413,33 @@ void GEOM(int NW)
             f_1 << "\n (×ÈÑËÎ ÇÓÁÜÅÂ,ÓÃÎË ÍÀÊËÎÍÀ)";
         
         }
-        /*
-  DO 37 I = 1, 2
-        C      DY(I) = DA(I) - 2 * M
-        DY(I) = D(I)
-        TGALY = SQRT(DY(I) * *2 - DB(I) * *2) / DB(I)
-        STY = DY(I) * ((PI / 2 + 2 * X(I) * TGAL) / Z(I) +
-            *INVAT - (TGALY - ATAN(TGALY)))
-        CSBY = 1 / SQRT(1 + (DY(I) * TGB / D(I)) * *2)
+   
+   //  Äëèíà êîíòàêòíûõ ëèíèé
+        if (BE != 0.) {
+            int NA = EPALF - static_cast<int>(EPALF);
+            int NB = EPBET - static_cast<int>(EPBET);
+            RLM = BW * EPALF / cos(BETB);
+            if ((NA + NB) < 1.) RLMIN = RLM * (1. - NA * NB / EPALF / EPBET);
+            else RLMIN = RLM * (1. - (1 - NA) * (1 - NB) / EPALF / EPBET);
 
-        PSIYV = STY * CSBY * *3 / DY(I)
-        SY(I) = DY(I) * SIN(PSIYV) / CSBY * *2
-        HAY(I) = 0.5 * (DA(I) - DY(I) + DY(I) *
-            *(1 - COS(PSIYV)) / CSBY * *2)
-        37 CONTINUE
-
-    */
-
-   /*
-        CALL DOP1L(M, D, KST, KST4, KST5, FR, EHS, TH,
-            *EWS1, EWS2, EWS, TWM, TW, ECS, TC)
-        DO 100 I = 1, 2
-        DLTHMN(I) = -DLTH(I) - EHS(I)
-        100 DLTHMX(I) = DLTHMN(I) + TH(I)
-        IF(IPR.GE.3) WRITE(1, 219) DLTHMN, DLTHMX
-        219 FORMAT(
-            *' ÏÐÅÄÅËÜÍÛÅ ÏÎÊÀÇÀÍÈß ÒÀÍÃÅÍ-' /
-            *' ÖÈÀËÜÍÎÃÎ ÇÓÁÎÌÅÐÀ                 DLTH', 2F10.3 /
-            *'                                        ', 2F10.3)
-        IF(IDXS.EQ.1.AND.BET.NE.0.AND.IPR.GT.6) WRITE(1, 232) XS
-        232 FORMAT(/ 1X, 'ÊÎÝÔ.ÑÓÌÌÛ ÑÌÅÙÅÍÈÉ ÂÍÅ ÐÅÊÎÌÅÍÄÓÅÌÛÕ ÏÐÅÄÅËÎÂ' /
-            *' ÎÒ -0.5 ÄÎ 0.5', 5X, 'XS = ', F6.3//
-            C      IF(IDXS.EQ.1) WRITE(1, 231)
-            * ' ÐÅÊÎÌÅÍÄÓÅÒÑß ÈÇÌÅÍÈÒÜ ÏÀÐÀÌÅÒÐÛ ÏÅÐÅÄÀ×È ',
-            *'(×ÈÑËÎ ÇÓÁÜÅÂ,ÓÃÎË ÍÀÊËÎÍÀ)' / )
-
- 
-        */
-
+            RKEPS = RLMIN / RLM;
+        }
+        else {
+            RLM = 0.;
+            RLMIN = 0.;
+            RKEPS = 0.;
+        } 
+  
+//    Øàãè çàöåïëåíèÿ è îñåâîé
+        PALF = PI * MN * CSAL;
+        if (BE != 0.) PX = PI * MN / SNB;
+        else PX = 100.;
+        
+        if (IPR == 7) {
+            RKP(U, DB, TGAA, ROP, TGATW, RL, ROW, TGAU, PALF, PX, TETP, TETV, DZTP, DZTV);
+            DGKP(I12, DB, BETB, DP, ROP, DL, ROL, DELZV, DG, ROG, DU, DV, RLM, RLMIN, RKEPS, PALF, PX, SNA, TETP, TETV, DZTP, DZTV);
+        }
+        
     }
 
     

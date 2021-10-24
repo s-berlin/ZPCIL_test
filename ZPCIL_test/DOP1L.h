@@ -305,16 +305,34 @@ void DOP1L(float M, float D[2], int KST[3], int KST4, int KST5, float FR[2], flo
 
         EHS[i] = static_cast<float>(- MEHS[IDE - 1][IVS - 1] / 1000.);
 
-        cout << "DOD1L: IVD = " << IVD << "   IFR = " << IFR << "   MTH[IFR-1][IVD-1] = " << MTH[IFR - 1][IVD - 1] << endl;
+        cout << "DOD1L: IVD = " << IVD << "   IFR = " << IFR << "   MTH[IFR-1][IVD-1] = " << MTH[IFR - 1][IVD - 1] << endl;  // табл. 15
 
         TH[i] = static_cast<float>(MTH[IFR - 1][IVD - 1] / 1000.);
 
+        cout << "DOD1L: IDW = " << IDW << "   IVS = " << IVS << "   MEWS1[IDW-1][IVS-1] = " << MEWS1[IDW - 1][IVS - 1] << endl; // табл. 16
+
         EWS1[i] = static_cast<float>(-MEWS1[IDW - 1][IVS - 1] / 1000.);
+
+        cout << "DOD1L: IFR = " << IFR << "   MEWS2[IFR-1] = " << MEWS2[IFR - 1] << endl; // табл. 17
+        
         EWS2[i] = static_cast<float>(-MEWS2[IFR-1] / 1000.);
+        
         EWS[i] = EWS1[i] + EWS2[i];
+
+        cout << "DOD1L: IFR = " << IFR << "   IVD = " << IVD << "   MTWM[IFR-1][IVD-1] = " << MTWM[IFR - 1][IVD - 1] << endl; // табл. 18
+
         TWM[i] = static_cast<float>(MTWM[IFR - 1][IVD - 1] / 1000.);
+
+        cout << "DOD1L: IFR = " << IFR << "   IVD = " << IVD << "   MTW[IFR-1][IVD-1] = " << MTW[IFR - 1][IVD - 1] << endl; // табл. 19
+
         TW[i] = static_cast<float>(MTW[IFR - 1][IVD - 1] / 1000.);
+
+        cout << "DOD1L: IDE = " << IDE << "   IVS = " << IVS << "   MECS[IDE-1][IVS-1] = " << MECS[IDE - 1][IVS - 1] << endl; // табл. 20
+
         ECS[i] = static_cast<float>(-MECS[IDE - 1][IVS - 1] / 1000.);
+
+        cout << "DOD1L: IFR = " << IFR << "   IVD = " << IVD << "   MTC[IFR-1][IVD-1] = " << MTC[IFR - 1][IVD - 1] << endl; // табл. 21
+
         TC[i] = static_cast<float>(MTC[IFR - 1][IVD - 1] / 1000.);
     }
     /*

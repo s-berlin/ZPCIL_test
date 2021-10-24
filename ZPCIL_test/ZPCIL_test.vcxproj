@@ -151,6 +151,8 @@
     <ClInclude Include="GEOM.h" />
     <ClInclude Include="DXS.h" />
     <ClInclude Include="DXS_ext.h" />
+    <ClInclude Include="DGKP.h" />
+    <ClInclude Include="RKP.h" />
     <ClInclude Include="SCT.h" />
     <ClInclude Include="ZPRGMS.h" />
     <ClInclude Include="ZPGR.h" />

@@ -62,5 +62,11 @@
     <ClInclude Include="DOP1L.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="RKP.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="DGKP.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
