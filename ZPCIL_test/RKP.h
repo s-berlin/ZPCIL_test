@@ -7,7 +7,6 @@ extern float Z1, Z2;                        // числа зубьев шестерни и колеса
 extern float MN, BE, X1, X2, X[2];          // модуль, угол наклона, коэффициенты смещения
 
 void RKP(float U, float DB[2], float TGAA[2], float ROP[2], float TGATW, float RL[2], float ROW[2], float TGAU[2], float PALF, float PX, float TETP[2], float TETV[2], float DZTP[2], float DZTV[2]) {
-      
     double VFAN1[2], VFUN1[2], VFPN1[2], VFVN1[2], VSUN1[2], VSAN1[2];
     double PI = 3.1415926;
     

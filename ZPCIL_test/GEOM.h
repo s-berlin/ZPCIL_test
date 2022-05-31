@@ -10,13 +10,14 @@
 #include "DOP1L.h"
 #include "RKP.h"
 #include "DGKP.h"
+#include "TABLP1.h"
 
 using namespace std;
 
 //========== Переменные по редуктору
 extern char IR[20];
-extern int IT, IRV, IPR, IE, ISR, IN, N1R;
-extern float L, WH;      // ресурс, часов
+extern int IT, IRV, IPR, IE, ISR, IN;
+extern float L, WH, N1R;      // ресурс, часов
 extern float T1R, TMAX;     // момент на входящем валу, Нм
 extern float TQ[20], TC[20], RM[20];
 
@@ -24,10 +25,10 @@ extern fstream f_1;    // файл для результата    //***
 
 //========== Переменные по ступени
 extern int IVP;                             // тип ступени
-extern float Z1, Z2;                        // числа зубьев шестерни и колеса
+extern float Z1, Z2, U;                     // числа зубьев шестерни и колеса
 extern float MN, BE, X1, X2, X[2];          // модуль, угол наклона, коэффициенты смещения
 extern int flaw;
-extern float AW, B1, B2;                    // межосевое расстояние ширины шестерни и колеса
+extern float AW, B1, B2, D1, D2;            // межосевое расстояние ширины шестерни и колеса
 extern float AL, HA, HL, CZV;               // угол профиля, коэффициенты: высоты головки, граничной высоты, радиального зазора  
 extern int IST1, IST2, IST3, IST4, IST5;    // степени точности по нормам: кинематики, плавности, контакта; вид сопряжения, вид допуска на боковой зазор
 extern int IMD, IKG;                        // коэф. наличия массивных деталей, номер схемы по упрощенному методу
@@ -42,12 +43,15 @@ extern int IMF1, IMF2, IVR;                 // признаки шлифования переходной по
 extern float CZ1, CZ2, KSP, KPD, PR;        // числа зацеплений за оборот шестерни и колеса, коэф. силового потока, КПД, вероятность неразрушения по изгибной выносливости
 extern float LO, S1, FKE, GM;               // расстояние между опорами, расстояние от опоры со стороны подвода момента до центра шестерни, ?, ?
 extern int IQ, IP, IZ1, IG;                 // тип приложения момента, тип подшипника, ?, ?
+extern float EPSA, EPSB, ZH, ZEPS;
+extern float ZVE1, ZVE2;
+extern float DA1, DA2, DB1, DB2, ALFTW;
 
 void GEOM(int NW)
 {
     fstream fi;
     float BBWW[2] = { 0,0 }, BW = 0;
-    float DW[2] = {}, D[2] = {}, DA[2] = {}, DB[2] = {}, DF[2] = {};
+    float D[2] = {}, DW[2] = {}, DA[2] = {}, DB[2] = {}, DF[2] = {};
     float DL[2] = {}, DP[2] = {}, DG[2] = {};
     float DLTH[2] = {}, TGAA[2] = {}, EA[2] = {}, HZ = 0;
     float ROG[2] = {}, TGAG[2] = {}, ROL[2] = {}, ROP[2] = {}, ZN[2];
@@ -70,7 +74,6 @@ void GEOM(int NW)
     int I12 = 0, iZNR = 0, IIW1 = 0, IIW2 = 0, IDXS = 0;
     float XS = 0;
     float SNATW = 0, CSATW = 0, TGATW = 0;
-    float ALFTW = 0;
     float RLM = 0, RLMIN = 0, RKEPS = 0;
     float PX = 0, PALF = 0;
     float TETP[2] = {}, TETV[2] = {}, DZTP[2] = {}, DZTV[2] = {};
@@ -114,7 +117,7 @@ void GEOM(int NW)
     float INVAT = TGAT - ALFT;
     float ZS = Z[0] + Z[1];
     float A = static_cast<float>(0.5 * ZS * MN / CSB);
-    float U = static_cast<float>(1. * Z[1] / Z[0]);
+    U = static_cast<float>(1. * Z[1] / Z[0]);
     cout << "\nGEOM: TGAL, ALFT, INVAT, ZS, A, MN, CSB, U = " << TGAL << ", " << ALFT << ", " << INVAT << ", " << ZS << ", " << A << ", " << MN << ", " << CSB << ", " << U << endl;
 
     f_1 << "\n       ОСНОВНЫЕ ГЕОМЕТРИЧЕСКИЕ ПАРАМЕТРЫ" << endl;
@@ -297,149 +300,241 @@ void GEOM(int NW)
         int II = CNT1(X, XMIN, DL, DP, SNA, EPALF, EPBET, EPGAM);  extern float BE;     //  KOHTPOЛЬ KAЧECTBA ЗАЦЕПЛЕНИЯ
      
         cout << "GEOM: II = " << II << endl;  // организовать прерывывание, если II == 3:    IF(II.EQ.3)  GOTO 61
-        
-        for (int i = 0; i < 2; i++) {
-            SC[i] = static_cast<float>((PI * CSAL * CSAL / 2 + X[i] * sin(2 * ALF)) * MN);
-            ROS[i] = static_cast<float>(0.5 * (DB[i] * TGAT + SC[i] * cos(BETB) / CSAL));
-            DS[i] = sqrt(DB[i] * DB[i] + 4 * ROS[i] * ROS[i]);
-            HH[i] = static_cast<float>(0.5 * (DA[i] - D[i] - SC[i] * TGAL));
-        }
-        if (IPR >= 3) {
-            f_1 << "\n\n      ЗУБОМЕРНЫЕ ПАРАМЕТРЫ" << endl;
-            f_1 << "\nПОСТОЯННАЯ ХОРДА ЗУБА                SC   " << round(SC[0] * 1000) / 1000 << "    " << round(SC[1] * 1000) / 1000;
-            f_1 << "\nВЫСОТА ДО ПОСТОЯННОЙ ХОРДЫ           HC   " << round(HH[0] * 1000) / 1000 << "    " << round(HH[1] * 1000) / 1000 << endl;
-        }
-        
-        for (int i = 0; i < 2; i++) {
-            float CSALX = Z[i] * CSAT / (Z[i] + 2 * X[i] * CSB);
+        if (II != 3) {
+            for (int i = 0; i < 2; i++) {
+                SC[i] = static_cast<float>((PI * CSAL * CSAL / 2 + X[i] * sin(2 * ALF)) * MN);
+                ROS[i] = static_cast<float>(0.5 * (DB[i] * TGAT + SC[i] * cos(BETB) / CSAL));
+                DS[i] = sqrt(DB[i] * DB[i] + 4 * ROS[i] * ROS[i]);
+                HH[i] = static_cast<float>(0.5 * (DA[i] - D[i] - SC[i] * TGAL));
+            }
+            if (IPR >= 3) {
+                f_1 << "\n\n      ЗУБОМЕРНЫЕ ПАРАМЕТРЫ" << endl;
+                f_1 << "\nПОСТОЯННАЯ ХОРДА ЗУБА                SC   " << round(SC[0] * 1000) / 1000 << "    " << round(SC[1] * 1000) / 1000;
+                f_1 << "\nВЫСОТА ДО ПОСТОЯННОЙ ХОРДЫ           HC   " << round(HH[0] * 1000) / 1000 << "    " << round(HH[1] * 1000) / 1000 << endl;
+            }
+
+            for (int i = 0; i < 2; i++) {
+                float CSALX = Z[i] * CSAT / (Z[i] + 2 * X[i] * CSB);
+
+                if (CSALX >= 1) ZN[i] = 3;
+
+                if (CSALX < 1) {
+                    double ZNR = Z[i] / PI * (sqrt(1 - CSALX * CSALX) / CSALX / cos(BETB) - 2 * X[i] * TGAL / Z[i] - INVAT) + 0.5;
+                    iZNR = static_cast<int>(ZNR);
+                    double TB = ZNR - iZNR;  // AINT() - усечение - целая часть?
+                    if (TB < 0.5) ZN[i] = static_cast<float>(iZNR);
+                    if (TB >= 0.5) ZN[i] = static_cast<float>(iZNR + 1);
+                }
+
+            m32:   W[i] = static_cast<float>((PI * (ZN[i] - 0.5) + 2 * X[i] * TGAL + Z[i] * INVAT) * MN * CSAL);
+                ROWN[i] = static_cast<float>(0.5 * W[i] * cos(BETB));
+                DWN[i] = sqrt(DB[i] * DB[i] + 4 * ROWN[i] * ROWN[i]);
+
+                if (DWN[i] >= DA[i]) {
+                    ZN[i] = ZN[i] - 1;
+                    goto m32;
+                }
+                if (DWN[i] <= DP[i]) {
+                    ZN[i] = ZN[i] + 1;
+                    goto m32;
+                }
+                if (DELZV != 0 && DWN[i] <= DG[i]) {
+                    ZN[i] = ZN[i] - 1;
+                    goto m32;
+                    // ----IF(W[i].GE.A) THEN    подумать !!!!!
+                }
+            }
+
+            A = 0;
+            if (BE > 0) A = BW / sin(BETB);
+            if (IPR > 3) {
+                IIW1 = 0;
+                IIW2 = 0;
+
+                if (BE > 0 && W[0] >= A && IPR >= 7) {
+                    f_1 << "\nИзмерение длины общей нормали ведущего зубчатого";
+                    f_1 << "\nколеса невозможно, т.к.  не выполняется дополни-";
+                    f_1 << "\nтельное условие для косозубых передач: ";
+                    f_1 << "\nW2 < A={В/sin(betb)}   W2= " << W[0] << "   A = " << A;
+                    IIW1 = 1;
+                }
+
+                if (IIW1 > 0 && IIW2 == 0 && IPR >= 3) {
+                    f_1 << "\nДЛИНА ОБЩЕЙ НОРМАЛИ                   W   " << W[1];
+                    f_1 << "\nЧИСЛО ЗУБЬЕВ В ДЛИНЕ ОБЩЕЙ НОРМАЛИ   ZW   " << ZN[1];
+                }
+                if (IIW2 > 0 && IIW1 == 0 && IPR >= 3) {
+                    f_1 << "\nДЛИНА ОБЩЕЙ НОРМАЛИ                   W   " << W[0];
+                    f_1 << "\nЧИСЛО ЗУБЬЕВ В ДЛИНЕ ОБЩЕЙ НОРМАЛИ   ZW   " << ZN[0];
+                }
+                if (IIW1 == 0 && IIW2 == 0 && IPR >= 3) {
+                    f_1 << "\nДЛИНА ОБЩЕЙ НОРМАЛИ                   W   " << round(W[0] * 1000) / 1000 << "   " << round(W[1] * 1000) / 1000;
+                    f_1 << "\nЧИСЛО ЗУБЬЕВ В ДЛИНЕ ОБЩЕЙ НОРМАЛИ   ZW       " << ZN[0] << "       " << ZN[1];
+                }
+            }
+
+            for (int i = 0; i < 2; i++) {
+                DY[i] = D[i];
+                TGALY = sqrt(DY[i] * DY[i] - DB[i] * DB[i]) / DB[i];
+                STY = static_cast<float>(DY[i] * ((PI / 2 + 2 * X[i] * TGAL) / Z[i] + INVAT - (TGALY - atan(TGALY))));
+                CSBY = static_cast<float>(1 / sqrt(1 + (DY[i] * TGB / D[i]) * (DY[i] * TGB / D[i])));
+                PSIYV = static_cast<float>(STY * CSBY * CSBY * CSBY / DY[i]);
+                SY[i] = static_cast<float>(DY[i] * sin(PSIYV) / (CSBY * CSBY));
+                HAY[i] = static_cast<float>(0.5 * (DA[i] - DY[i] + DY[i] * (1 - cos(PSIYV)) / (CSBY * CSBY)));
+            }
+
+            if (IPR >= 3) {
+                f_1 << "\nТОЛЩИНА ПО ХОРДЕ ЗУБА ДЕЛИТЕЛЬНАЯ     S     " << round(SY[0] * 1000) / 1000 << "    " << round(SY[1] * 1000) / 1000;
+                f_1 << "\nВЫСОТА ДО ХОРДЫ ЗУБА ДЕЛИТЕЛЬНАЯ     HA     " << round(HAY[0] * 1000) / 1000 << "    " << round(HAY[1] * 1000) / 1000 << endl;  // получились значения на 0.001 меньшие
+            }
+
+            int KST4 = IST4;
+            int KST5 = IST5;
+
+            DOP1L(MN, D, KST, KST4, KST5, FR, EHS, TH, EWS1, EWS2, EWS, TWM, TW, ECS, TC_);
+
+            cout << "D = " << D[0] << "    " << D[1] << endl;
+            cout << "DLTH = " << DLTH[0] << "    " << DLTH[1] << endl;
+            cout << "EHS = " << EHS[0] << "    " << EHS[1] << endl;
+            cout << "TH = " << TH[0] << "    " << TH[1] << endl;
+
+            for (int i = 0; i < 2; i++) {
+
+                DLTHMN[i] = -DLTH[i] - EHS[i];
+                DLTHMX[i] = DLTHMN[i] + TH[i];
+            }
+            if (IPR >= 3) { //WRITE(1, 219) DLTHMN, DLTHMX
+                f_1 << "\nПРЕДЕЛЬНЫЕ ПОКАЗАНИЯ ТАНГЕН- ";
+                f_1 << "\nЦИАЛЬНОГО ЗУБОМЕРА                 DLTH   " << round(DLTHMN[0] * 1000) / 1000 << "       " << round(DLTHMN[1] * 1000) / 1000;  // 0.2    0.25    вместо   0.2      0.25
+                f_1 << "\n                                          " << round(DLTHMX[0] * 1000) / 1000 << "       " << round(DLTHMX[1] * 1000) / 1000;  // 0.4    0.45             0.6      0.65
+            }
+
+            if (IDXS == 1 && BE != 0 && IPR > 6) {
+                f_1 << "\nКОЭФ.СУММЫ СМЕЩЕНИЙ ВНЕ РЕКОМЕНДУЕМЫХ ПРЕДЕЛОВ";
+                f_1 << "\n ОТ -0.5 ДО 0.5     XS = " << setw(6) << XS;
+                f_1 << "\n РЕКОМЕНДУЕТСЯ ИЗМЕНИТЬ ПАРАМЕТРЫ ПЕРЕДАЧИ";
+                f_1 << "\n (ЧИСЛО ЗУБЬЕВ,УГОЛ НАКЛОНА)";
+
+            }
+
+            //  Длина контактных линий
+            if (BE != 0.) {
+                int NA = EPALF - static_cast<int>(EPALF);
+                int NB = EPBET - static_cast<int>(EPBET);
+                RLM = BW * EPALF / cos(BETB);
+                if ((NA + NB) < 1.) RLMIN = RLM * (1. - NA * NB / EPALF / EPBET);
+                else RLMIN = RLM * (1. - (1 - NA) * (1 - NB) / EPALF / EPBET);
+
+                RKEPS = RLMIN / RLM;
+            }
+            else {
+                RLM = 0.;
+                RLMIN = 0.;
+                RKEPS = 0.;
+            }
+
+            //    Шаги зацепления и осевой
+            PALF = PI * MN * CSAL;
+            if (BE != 0.) PX = PI * MN / SNB;
+            else PX = 100.;
+
+            if (IPR == 7) {
+                RKP(U, DB, TGAA, ROP, TGATW, RL, ROW, TGAU, PALF, PX, TETP, TETV, DZTP, DZTV);
+                DGKP(I12, DB, BETB, DP, ROP, DL, ROL, DELZV, DG, ROG, DU, DV, RLM, RLMIN, RKEPS, PALF, PX, SNA, TETP, TETV, DZTP, DZTV);
+            }
             
-            if (CSALX >= 1) ZN[i] = 3;
+ //           TABLP1(Z, KST, KST4, KST5, DLTH, SC,
+ //               HH, SY, HAY, D, DA, HZ, EHS, TH, IIW1, IIW2);
 
-            if (CSALX < 1) {
-                double ZNR = Z[i] / PI * (sqrt(1 - CSALX * CSALX) / CSALX / cos(BETB) - 2 * X[i] * TGAL / Z[i] - INVAT) + 0.5;
-                iZNR = static_cast<int>(ZNR);
-                double TB = ZNR - iZNR;  // AINT() - усечение - целая часть?
-                if (TB < 0.5) ZN[i] = static_cast<float>(iZNR);
-                if (TB >= 0.5) ZN[i] = static_cast<float>(iZNR + 1);
-            }            
-            
-     m32:   W[i] = static_cast<float>((PI * (ZN[i] - 0.5) + 2 * X[i] * TGAL + Z[i] * INVAT) * MN * CSAL);
-            ROWN[i] = static_cast<float>(0.5 * W[i] * cos(BETB));
-            DWN[i] = sqrt(DB[i] * DB[i] + 4 * ROWN[i] * ROWN[i]);
-            
-            if (DWN[i] >= DA[i]) {
-                ZN[i] = ZN[i] - 1;
-                goto m32;
-            }
-            if (DWN[i] <= DP[i]) {
-                ZN[i] = ZN[i] + 1;
-                goto m32;
-            }
-            if (DELZV != 0 && DWN[i] <= DG[i]) {
-                ZN[i] = ZN[i] - 1;
-                goto m32;
-                // ----IF(W[i].GE.A) THEN    подумать !!!!!
-            }
+            D1 = D[0];
+            D2 = D[1];
+            float DU1 = DU[0];
+            float DU2 = DU[1];
+            DA1 = DA[0];
+            DA2 = DA[1];
+            DB1 = DB[0];
+            DB2 = DB[1];
+            ZVE1 = Z[0] / CSB;
+            ZVE2 = Z[1] / CSB;
+            EPSA = EPALF;
+            EPSB = EPBET;
+            ZH = sqrt(2. * cos(BETB) / TGATW) / CSAT;
+            ZEPS = sqrt((4. - EPSA) / 3.);
+
+            cout << "GEOM: ***   EPSA = " << EPSA << "   EPSB = " << EPSB << " ZH =  " << ZH << " ZEPS =  " << ZEPS << " D1 =  " << D1 << " D2 =  " << D2 << endl;
         }
-       
-        A = 0;
-        if (BE > 0) A = BW / sin(BETB);
-        if (IPR > 3) {
-            IIW1 = 0;
-            IIW2 = 0;
+       /*
 
-            if (BE > 0 && W[0] >= A && IPR >= 7) {
-                f_1 << "\nИзмерение длины общей нормали ведущего зубчатого";
-                f_1 << "\nколеса невозможно, т.к.  не выполняется дополни-";
-                f_1 << "\nтельное условие для косозубых передач: ";
-                f_1 << "\nW2 < A={В/sin(betb)}   W2= " << W[0] << "   A = " << A;
-                IIW1 = 1;
-            }
+     61     X1 = X(1)
+            X2 = X(2)
+            D1 = D(1)
+            D2 = D(2)
+            DU1 = DU(1)
+            DU2 = DU(2)
+            DA1 = DA(1)
+            DA2 = DA(2)
+            DB1 = DB(1)
+            DB2 = DB(2)
+            ZVE1 = Z(1) / CSB
+            ZVE2 = Z(2) / CSB
+            EPSA = EPALF
+            EPSB = EPBET
+            BE = BET
+            ZH = SQRT(2. * COS(BETB) / TGATW) / CSAT
+            ZEPS = SQRT((4. - EPSA) / 3.)
+            IF(BE.EQ.0.) GO TO 1010
+            ZEPS = SQRT(1. / EPSA)
+            IF(EPSB.LT.1.) ZEPS = SQRT((4. - EPSA) * (1. - EPSB) / 3.
+                * +EPSB / EPSA)
+            1010  CONTINUE
+            CCC	PRINT*, 'IAX=', IAX
+            IF(IPR.GE.3) WRITE(1, 300)
+            300 FORMAT(' __________ ')
 
-            if (IIW1 > 0 && IIW2 == 0 && IPR >= 3) {
-                f_1 << "\nДЛИНА ОБЩЕЙ НОРМАЛИ                   W   " << W[1];
-                f_1 << "\nЧИСЛО ЗУБЬЕВ В ДЛИНЕ ОБЩЕЙ НОРМАЛИ   ZW   " << ZN[1];
-            }
-            if (IIW2 > 0 && IIW1 == 0 && IPR >= 3) {
-                f_1 << "\nДЛИНА ОБЩЕЙ НОРМАЛИ                   W   " << W[0];
-                f_1 << "\nЧИСЛО ЗУБЬЕВ В ДЛИНЕ ОБЩЕЙ НОРМАЛИ   ZW   " << ZN[0];
-            }
-            if (IIW1 == 0 && IIW2 == 0 && IPR >= 3) {
-                f_1 << "\nДЛИНА ОБЩЕЙ НОРМАЛИ                   W   " << round(W[0] * 1000) / 1000 << "   " << round(W[1] * 1000) / 1000;
-                f_1 << "\nЧИСЛО ЗУБЬЕВ В ДЛИНЕ ОБЩЕЙ НОРМАЛИ   ZW       " << ZN[0] << "       " << ZN[1];
-            }
-        }        
+
+            write(20, 55571) B1
+            write(20, 55572) B2
+            write(20, 5558) aw
+
+            write(20, 5574)  UU
+
+            write(20, 5561) Dw(1)
+            write(20, 5562) Dw(2)
+            write(20, 5563) Da(1)
+            write(20, 5564) Da(2)
+            write(20, 5565) Df(1)
+            write(20, 5566) Df(2)
+
+            write(20, 5582) ZN(1), ZN(2), HAY(1), HAY(2)
+
+            CLOSE(20)
+
+            5550	format('IVP,N2,', I2, '.')
+            55541	format('ALFA,C8,', F5.2, F3.2)
+
+            55571	format('B1,N7.2,', F7.2)
+            55572	format('B2,N7.2,', F7.2)
+            5558	format('AW,N7.2,', F7.2)
+
+            5574	format('U,N8.3,', F8.3)
+            5575	format('GRM,N8.3,', F8.3)
+            5576	format('SEC,N8.3,', F8.3)
+
+            5561	format('DW1,N8.3,', F8.3)
+            5562	format('DW2,N8.3,', F8.3)
+            5563	format('DA1,N8.3,', F8.3)
+            5564	format('DA2,N8.3,', F8.3)
+            5565	format('DF1,N8.3,', F8.3)
+            5566	format('DF2,N8.3,', F8.3)
+
+            5582	format('ZW1,N7.2,', f7.3 / ' ZW2,N7.2,', f7.3 /
+                *' HA1,N7.2,', f7.3 / ' HA2,N7.2,', f7.3)
+
+
+            RETURN
+       */
         
-        for (int i = 0; i < 2; i++) {
-            DY[i] = D[i];
-            TGALY = sqrt(DY[i] * DY[i] - DB[i] * DB[i]) / DB[i];
-            STY = static_cast<float>(DY[i] * ((PI / 2 + 2 * X[i] * TGAL) / Z[i] + INVAT - (TGALY - atan(TGALY))));
-            CSBY = static_cast<float>(1 / sqrt(1 + (DY[i] * TGB / D[i]) * (DY[i] * TGB / D[i])));
-            PSIYV = static_cast<float>(STY * CSBY * CSBY * CSBY / DY[i]);
-            SY[i] = static_cast<float>(DY[i] * sin(PSIYV) / (CSBY * CSBY));
-            HAY[i] = static_cast<float>(0.5 * (DA[i] - DY[i] + DY[i] * (1 - cos(PSIYV)) / (CSBY * CSBY)));
-        }
-        
-        if (IPR >= 3) {
-            f_1 << "\nТОЛЩИНА ПО ХОРДЕ ЗУБА ДЕЛИТЕЛЬНАЯ     S     " << round(SY[0] * 1000) / 1000 << "    " << round(SY[1] * 1000) / 1000;    
-            f_1 << "\nВЫСОТА ДО ХОРДЫ ЗУБА ДЕЛИТЕЛЬНАЯ     HA     " << round(HAY[0] * 1000) / 1000 << "    " << round(HAY[1] * 1000) / 1000 << endl;  // получились значения на 0.001 меньшие
-        }
-
-        int KST4 = IST4;
-        int KST5 = IST5;
-        
-        DOP1L(MN, D, KST, KST4, KST5, FR, EHS, TH, EWS1, EWS2, EWS, TWM, TW, ECS, TC_);
-        
-        cout << "D = " << D[0] << "    " << D[1] << endl;
-        cout << "DLTH = " << DLTH[0] << "    " << DLTH[1] << endl;
-        cout << "EHS = " << EHS[0] << "    " << EHS[1] << endl;
-        cout << "TH = " << TH[0] << "    " << TH[1] << endl;
-
-        for (int i = 0; i < 2; i++) {
-
-            DLTHMN[i] = -DLTH[i] - EHS[i];
-            DLTHMX[i] = DLTHMN[i] + TH[i];
-        }
-        if (IPR >= 3) { //WRITE(1, 219) DLTHMN, DLTHMX
-            f_1 << "\nПРЕДЕЛЬНЫЕ ПОКАЗАНИЯ ТАНГЕН- ";
-            f_1 << "\nЦИАЛЬНОГО ЗУБОМЕРА                 DLTH   " << round(DLTHMN[0] * 1000) / 1000 << "       " << round(DLTHMN[1] * 1000) / 1000;  // 0.2    0.25    вместо   0.2      0.25
-            f_1 << "\n                                          " << round(DLTHMX[0] * 1000) / 1000 << "       " << round(DLTHMX[1] * 1000) / 1000;  // 0.4    0.45             0.6      0.65
-        }
-
-        if (IDXS == 1 && BE != 0 && IPR > 6) {
-            f_1 << "\nКОЭФ.СУММЫ СМЕЩЕНИЙ ВНЕ РЕКОМЕНДУЕМЫХ ПРЕДЕЛОВ";
-            f_1 << "\n ОТ -0.5 ДО 0.5     XS = " << setw(6) << XS;
-            f_1 << "\n РЕКОМЕНДУЕТСЯ ИЗМЕНИТЬ ПАРАМЕТРЫ ПЕРЕДАЧИ";
-            f_1 << "\n (ЧИСЛО ЗУБЬЕВ,УГОЛ НАКЛОНА)";
-        
-        }
-   
-   //  Длина контактных линий
-        if (BE != 0.) {
-            int NA = EPALF - static_cast<int>(EPALF);
-            int NB = EPBET - static_cast<int>(EPBET);
-            RLM = BW * EPALF / cos(BETB);
-            if ((NA + NB) < 1.) RLMIN = RLM * (1. - NA * NB / EPALF / EPBET);
-            else RLMIN = RLM * (1. - (1 - NA) * (1 - NB) / EPALF / EPBET);
-
-            RKEPS = RLMIN / RLM;
-        }
-        else {
-            RLM = 0.;
-            RLMIN = 0.;
-            RKEPS = 0.;
-        } 
-  
-//    Шаги зацепления и осевой
-        PALF = PI * MN * CSAL;
-        if (BE != 0.) PX = PI * MN / SNB;
-        else PX = 100.;
-        
-        if (IPR == 7) {
-            RKP(U, DB, TGAA, ROP, TGATW, RL, ROW, TGAU, PALF, PX, TETP, TETV, DZTP, DZTV);
-            DGKP(I12, DB, BETB, DP, ROP, DL, ROL, DELZV, DG, ROG, DU, DV, RLM, RLMIN, RKEPS, PALF, PX, SNA, TETP, TETV, DZTP, DZTV);
-        }
-        
+        return;
     }
 
     

@@ -6,13 +6,15 @@
 #include "DSR.h"
 #include "VYVODS.h"
 #include "GEOM.h"
+#include "CONTAU.h"
+#include "IZGIBU.h"
 
 using namespace std;
 
 //========== Переменные по редуктору
 extern char IR[20];
-extern int IT, IRV, IPR, IE, ISR, IN, N1R;
-extern float L, WH;      // ресурс, часов
+extern int IT, IRV, IPR, IE, ISR, IN;
+extern float L, WH, N1R;      // ресурс, часов
 extern float T1R, TMAX;     // момент на входящем валу, Нм
 extern float TQ[20], TC[20], RM[20];
 
@@ -20,10 +22,10 @@ extern fstream f_1;    // файл для результата    //***
 
 //========== Переменные по ступени
 extern int IVP;                             // тип ступени
-extern float Z1, Z2;                          // числа зубьев шестерни и колеса
-extern float MN, BE, X1, X2;                // модуль, угол наклона, коэффициенты смещения
+extern float Z1, Z2;                        // числа зубьев шестерни и колеса
+extern float MN, BE, X1, X2, X[2];          // модуль, угол наклона, коэффициенты смещения
 extern int flaw;
-extern float AW, B1, B2;                    // межосевое расстояние ширины шестерни и колеса
+extern float AW, B1, B2, D1, D2;            // межосевое расстояние ширины шестерни и колеса
 extern float AL, HA, HL, CZV;               // угол профиля, коэффициенты: высоты головки, граничной высоты, радиального зазора  
 extern int IST1, IST2, IST3, IST4, IST5;    // степени точности по нормам: кинематики, плавности, контакта; вид сопряжения, вид допуска на боковой зазор
 extern int IMD, IKG;                        // коэф. наличия массивных деталей, номер схемы по упрощенному методу
@@ -38,11 +40,14 @@ extern int IMF1, IMF2, IVR;                 // признаки шлифования переходной по
 extern float CZ1, CZ2, KSP, KPD, PR;        // числа зацеплений за оборот шестерни и колеса, коэф. силового потока, КПД, вероятность неразрушения по изгибной выносливости
 extern float LO, S1, FKE, GM;               // расстояние между опорами, расстояние от опоры со стороны подвода момента до центра шестерни, ?, ?
 extern int IQ, IP, IZ1, IG;                 // тип приложения момента, тип подшипника, ?, ?
+extern float EPSA, EPSB, ZH, ZEPS;
+extern float DA1, DA2, DB1, DB2, ALFTW;
 
-void CILEV()
+void CILEV(int IT1, float TQ1[100], float TC1[100], float RM1[100])
 {
     float BBWW[2] = {0,0}, BW = 0;
-
+    float SGN = 0;
+    float A0 = 0;
 
     DSR(); // чтение исходных данных о ступени редуктора
     VYVODS(); // вывод исходных данных о ступени редуктора
@@ -59,7 +64,57 @@ void CILEV()
     
     int NW = 0;  // число сателлитов
 
+
     GEOM(NW);
+    cout << "CILEV: after GEOM:    ZH = " << ZH << "   ZEPS = " << ZEPS << "   D1 = " << D1 << "   D2 = " << D2 << endl;
+
+    //    if (IAX == 4)  GOTO 96
+  m42:
+    if (L != 0) {
+  m85:
+        SGN = 1;
+        A0 = 0;
+    }
+ //   for (int i = 0; i < IT1; i++) TQ1[i] = TQ1[i] * KSP;
+    for (int i = 0; i < IT; i++) TQ[i] = TQ[i] * KSP;
+    TMAX = TMAX * KSP;
+    float DTC = 0.;
+    float KNR = 1.;
+
+ //==== вызов подпpогpаммы пpочностного pасчета активных повеpхностей зубьев по контакту ===============
+    CONTAU(SGN, NW, A0, DTC, KNR, IT1, TQ1, TC1, RM1);
+    /*
+     if (IVR == 3) {  // расчет для дифференциала
+     
+
+     }
+    */
+
+        // - вызов подпpогpаммы пpочностного pасчета зубьев пpи изгибе
+
+ //       WRITE(7, 705) WH, AW, ALTW, Z1, Z2
+ //       705  FORMAT(' CILEV bef izgb: WH,AW,ALTW,z1,z2: ' /
+ //           *3F9.3, 2F4.0)
+ //       IF(L.LT. - 1.) WRITE(4, 106) IS
+ //       106 FORMAT(/ 23X, I2, ' - п бвгЇҐ­м '//
+ //           * 9X, '( жЁ«Ё­¤аЁзҐбЄ п нў®«мўҐ­в­ п ЇҐаҐ¤ з ', /
+ //           *9X, '          ў­Ґи­ҐЈ® § жҐЇ«Ґ­Ёп )')
+    float Z0 = 20.;
+    float P = 0;
+    float ALTW = 0;
+    float TN = 0, TNZ = 0;
+    float SFLB1Z = 0, SFLB2Z = 0, SFPM1Z = 0, SFPM2Z = 0;
+    float TQF = 0, TQFP = 0, TQEV = 0, RMP = 0, EV = 0, EP = 0;
+    float PF10 = 0, PF20 = 0, SFMF1 = 0, SFMF2 = 0, SFN10 = 0, SFN20 = 0, SFG1 = 0, SFG2 = 0, SFF10 = 0,  SFF20 = 0;
+
+    IZGIBU(SGN, 0, DTC, A0, KNR, P,
+        D1, D2, ALTW,
+        Z0,
+        TN, TNZ,
+        SFLB1, SFLB2, SFPM1, SFPM2,
+        TQF, TQFP, TQEV, RMP, EV, EP,
+        PF10, PF20, SFMF1, SFMF2, SFN10, SFN20, SFG1, SFG2, SFF10, SFF20);
+    
 };
 /*
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -159,72 +214,79 @@ SUBROUTINE CILEV(JJ, IR, IVP, IS, ISR, L, WH, TMAX,
     655  FORMAT(' SHN1,SHN2,SHG1,SHG2,SHF1,SHF20 ' / 1X, 6F10.5)
     WRITE(7, 6550) PH10, PH20, SHMF1, SHMF2
     6550  FORMAT(' PH10,PH20,SHMF1,SHMF2 ' / 1X, 4F10.5)
-    IF(IVR.EQ.3) THEN
+    
+    IF(IVR.EQ.3) THEN  // дифференциал =========================================================
     c------ - ђ бзҐв ¤Ґ©бвўЁвҐ«м­®Ј® Є®нддЁжЁҐ­в  н Ї б  Їа®з­®бвЁ
     c------ - Ї® ¬Ґв®¤ЁЄҐ ‘…ђ…Ќ‘…ЌЂ - ЉЋ‡‹Ћ‚Ђ - ђЂ‘“‹Ћ‚Ђ - ѓЋ‹‹…ђЂ
     c------ - Расчет действительного коэффициента эапаса прочности
     c------ - по методике СЕРЕНСЕНА - КОЗЛОВА - РАСУЛОВА - ГОЛЛЕРА
 
-    DO 677 I2 = 1, 2
-    IF(I2.EQ.1) SHF = SHF10
-    IF(I2.EQ.2) SHF = SHF20
-    WRITE(7, 658) I2, IT1, SHF
-    658   FORMAT(' <CILEV1> I2  IT1  SHF=   ', 2I5, F10.2)
-    IF(SHF.LT.1.05.AND.SHF.GT.0.95) GOTO 59
-    SHR(1) = SHF
-    WRITE(7, 659) SHR(1)
-    659   FORMAT(' <CILEV1>  SHR(1)=   ', F10.2)
-    DO 53 II = 1, 10
-    DO 51 I = 1, IT1
-    IF(II.EQ.1) THEN
-    TQR(I) = TQ1(I) * SHR(II) * *2
-    ELSE
-    TQR(I) = TQR(I) * SHR(II) * *2
-    END IF
-    51        CONTINUE
-    WRITE(7, 661) (TQR(I), I = 1, IT1)
-    661   FORMAT('   TQR   ', 5F10.2)
-    CALL CONTAU(IVP, IPR, IE, SGN, NW, A0, DTC, KNR, L,
-        *Z1, Z2, MN, AL, BE, X1, X2, BW, IMD, HA, CZ1, CZ2,
-        *U, AW, D1, D2, EPSA, EPSB, ALTW, ZH, ZEPS, DU1, DU2,
-        *DA1, DA2, DB1, DB2, ZVE1, ZVE2,
-        *IT1, TQR, TC1, RM1, WH, TMAX, IST2, IST3,
-        *IKG, IG, IQ, IP, LO, S1, FKE, IZ1, GM,
-        *IG1, IG2, H1, H2, HK1, HK2, HT1, HT2,
-        *SHER1, SHER2, IVR, SHV1, SHV2,
-        *SHLM1, SHLM2, SHPM1, SHPM2,
-        *KFBE, TQH, TQHP,
-        *PH1, PH2, SHMF1, SHMF2, SHN1, SHN2, SHG1, SHG2, SHF1, SHF2)
-    IF(I2.EQ.1)  SHR(II + 1) = SHF1
-    IF(I2.EQ.2)  SHR(II + 1) = SHF2
-    WRITE(7, 668) II, SHR(II + 1)
-    668   FORMAT('  II  SHR(ii+1) ', I5, F10.2)
-    IF(SHR(ii + 1).LT.1.05.AND.SHR(ii + 1).GT.0.95) THEN
-    IIR = II
-    GOTO 55
-    END IF
-    53  CONTINUE
-    55  SHF = SHR(1)
-    WRITE(7, 662) (SHR(I), I = 1, 10)
-    662   FORMAT('   SHR(i=1,10)   ', 5F10.2)
-    DO 58 I = 1, IIR
-    SHF = SHF * SHR(I + 1)
-    WRITE(7, 663) SHF
-    663   FORMAT(' from  SHF(2) to  SHF(iir)  ', F15.3)
-    58        CONTINUE
-    59   IF(I2.EQ.1) THEN
-    SHR1 = SHF
-    WRITE(7, 664) IIR, SHF
-    664       FORMAT(' ‚…„“™……   IIR   SHF1  ', I5, F10.3)
-    ELSE
-    SHR2 = SHF
-    WRITE(7, 665) IIR, SHF
-    665       FORMAT(' ‚…„ЋЊЋ…   IIR   SHF2  ', I5, F10.3)
-    END IF
-    677   CONTINUE
-    CALL PRCPC3(IVP, PH10, PH20, SHMF1, SHMF2,
-        *SHN10, SHN20, SHF10, SHF20, SHR1, SHR2)
-    END IF
+        DO 677 I2 = 1, 2
+        IF(I2.EQ.1) SHF = SHF10
+        IF(I2.EQ.2) SHF = SHF20
+        WRITE(7, 658) I2, IT1, SHF
+        658   FORMAT(' <CILEV1> I2  IT1  SHF=   ', 2I5, F10.2)
+        IF(SHF.LT.1.05.AND.SHF.GT.0.95) GOTO 59
+        SHR(1) = SHF
+        WRITE(7, 659) SHR(1)
+        659   FORMAT(' <CILEV1>  SHR(1)=   ', F10.2)
+        DO 53 II = 1, 10
+            DO 51 I = 1, IT1
+                IF(II.EQ.1) THEN
+                    TQR(I) = TQ1(I) * SHR(II) * *2
+                ELSE
+                    TQR(I) = TQR(I) * SHR(II) * *2
+                END IF
+            51        CONTINUE
+            WRITE(7, 661) (TQR(I), I = 1, IT1)
+            661   FORMAT('   TQR   ', 5F10.2)
+            CALL CONTAU(IVP, IPR, IE, SGN, NW, A0, DTC, KNR, L,
+                    *Z1, Z2, MN, AL, BE, X1, X2, BW, IMD, HA, CZ1, CZ2,
+                    *U, AW, D1, D2, EPSA, EPSB, ALTW, ZH, ZEPS, DU1, DU2,
+                    *DA1, DA2, DB1, DB2, ZVE1, ZVE2,
+                    *IT1, TQR, TC1, RM1, WH, TMAX, IST2, IST3,
+                    *IKG, IG, IQ, IP, LO, S1, FKE, IZ1, GM,
+                    *IG1, IG2, H1, H2, HK1, HK2, HT1, HT2,
+                    *SHER1, SHER2, IVR, SHV1, SHV2,
+                    *SHLM1, SHLM2, SHPM1, SHPM2,
+                    *KFBE, TQH, TQHP,
+                    *PH1, PH2, SHMF1, SHMF2, SHN1, SHN2, SHG1, SHG2, SHF1, SHF2)
+    
+            IF(I2.EQ.1)  SHR(II + 1) = SHF1
+            IF(I2.EQ.2)  SHR(II + 1) = SHF2
+            WRITE(7, 668) II, SHR(II + 1)
+            668   FORMAT('  II  SHR(ii+1) ', I5, F10.2)
+    
+            IF(SHR(ii + 1).LT.1.05.AND.SHR(ii + 1).GT.0.95) THEN
+                IIR = II
+                GOTO 55
+            END IF
+        53  CONTINUE
+    
+        55  SHF = SHR(1)
+        WRITE(7, 662) (SHR(I), I = 1, 10)
+        662   FORMAT('   SHR(i=1,10)   ', 5F10.2)
+        DO 58 I = 1, IIR
+            SHF = SHF * SHR(I + 1)
+            WRITE(7, 663) SHF
+            663   FORMAT(' from  SHF(2) to  SHF(iir)  ', F15.3)
+        58        CONTINUE
+    
+        59  IF(I2.EQ.1) THEN
+            SHR1 = SHF
+            WRITE(7, 664) IIR, SHF
+            664       FORMAT(' ‚…„“™……   IIR   SHF1  ', I5, F10.3)
+        ELSE
+            SHR2 = SHF
+            WRITE(7, 665) IIR, SHF
+            665       FORMAT(' ‚…„ЋЊЋ…   IIR   SHF2  ', I5, F10.3)
+        END IF
+    
+        677   CONTINUE
+        CALL PRCPC3(IVP, PH10, PH20, SHMF1, SHMF2,
+            *SHN10, SHN20, SHF10, SHF20, SHR1, SHR2)
+    END IF // ==============================================================
+    
     C---- - ўл§®ў Ї®¤Їp®Јp ¬¬л Їp®з­®бв­®Ј® p бзҐв 
     C---- - §гЎмҐў ЇpЁ Ё§ЈЁЎҐ
     C---- - вызов подпpогpаммы пpочностного pасчета

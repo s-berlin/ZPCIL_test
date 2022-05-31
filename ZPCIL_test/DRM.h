@@ -9,8 +9,8 @@ using namespace std;
 
 extern char IR[20];
 
-extern int IT, IRV, IPR, IE, ISR, IN, N1R;
-extern float L, WH;      // ресурс, часов
+extern int IT, IRV, IPR, IE, ISR, IN;
+extern float L, WH, N1R;      // ресурс, часов
 extern float T1R, TMAX;     // момент на вход€щем валу, Ќм
 extern float TQ[20], TC[20], RM[20];
 
