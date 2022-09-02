@@ -171,6 +171,7 @@
     <ClInclude Include="KFAB0.h" />
     <ClInclude Include="NDTRI.h" />
     <ClInclude Include="PRCPI.h" />
+    <ClInclude Include="RUZC.h" />
     <ClInclude Include="SGMFLB.h" />
     <ClInclude Include="SGMHKA.h" />
     <ClInclude Include="KBETPL.h" />

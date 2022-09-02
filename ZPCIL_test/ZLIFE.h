@@ -3,7 +3,7 @@
 
 using namespace std;
 
-float ZLIFE(int ITH, int ITH0, int ITH1, float SHLIM, float SHR[100], float SHRR, float NHLIM, float NC[100], float HB, float NHE)
+float ZLIFE(int ITH, int ITH0, int ITH1, float SHLIM, float SHR[100], float SHRR, float NHLIM, float NC[100], float HB, float& NHE)
 {
     //	ITH - количество ступеней циклограммы
     //  ITH1 - количество ступеней, в которых  SHR > SHLIM
@@ -12,7 +12,7 @@ float ZLIFE(int ITH, int ITH0, int ITH1, float SHLIM, float SHR[100], float SHRR
     float QH1 = 6;
     float QH2 = 20;
     //  I0 - начальная ступень суммирования усталости
-    int I0 = 1 + ITH0;
+    int I0 = ITH0;
 
     cout << "ZLIFE: I0 = " << I0 << "   ITH = " << ITH << endl;
 
@@ -23,6 +23,7 @@ float ZLIFE(int ITH, int ITH0, int ITH1, float SHLIM, float SHR[100], float SHRR
         
         if (ITH1 - ITH0 <= 0) { // ================ 5 ===============
             NHE = NHE + NC[i] * pow((SHR[i] / SHRR), QH2);
+            cout << "ZLIFE: === 5 ===    NC[i] = " << NC[i] << "   SHR[i] = " << SHR[i] << "   SHRR = " << SHRR << "   QH2 = " << QH2 << endl;
             if (NHE <= NHLIM)  ZN = pow((NHLIM / NHE), 0.167);
             if (NHE > NHLIM)   ZN = pow((NHLIM / NHE), 0.05);
             cout << "ZLIFE: === 5 ===    NHE = " << NHE << "   NHLIM = " << NHLIM << "   ZN = " << ZN << endl;
@@ -42,6 +43,7 @@ float ZLIFE(int ITH, int ITH0, int ITH1, float SHLIM, float SHR[100], float SHRR
             }
         }     
     }
+    cout << "ZLIFE: return   ZN = " << ZN << endl;
     zlife = ZN;
     return zlife;
 }

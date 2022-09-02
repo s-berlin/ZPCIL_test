@@ -226,7 +226,7 @@ void DOP1L(float M, float D[2], int KST[3], int KST4, int KST5, float FR[2], flo
     if (KST4 == 2) IVS = IS + 11;
     if (KST4 == 1) IVS = IS + 17;
     IV = 7 - KST4;
-    IVD = 6 - KST5;
+    IVD = 9 - KST5;
     for (int i = 0; i < 2; i++) {
 
      //   CCCC      if (D[i] <= 6300.) IDF = 7;

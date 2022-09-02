@@ -55,7 +55,7 @@ void GEOM(int NW)
     float DL[2] = {}, DP[2] = {}, DG[2] = {};
     float DLTH[2] = {}, TGAA[2] = {}, EA[2] = {}, HZ = 0;
     float ROG[2] = {}, TGAG[2] = {}, ROL[2] = {}, ROP[2] = {}, ZN[2];
-    float W[2] = {}, ROWN[2] = {}, DWN[2] = {};
+    float ROWN[2] = {}, DWN[2] = {};
     float XMIN[2] = {}, XMINR[2] = {}, BETA[2] = {}, SNA[2] = {};
     float DU[2] = {}, TGAU[2] = {}, ROW[2] = {}, TGAV[2] = {}, DV[2] = {}, RL[2] = {};
     float SC[2] = {}, ROS[2] = {}, DS[2] = {}, HH[2] = {};
@@ -63,11 +63,12 @@ void GEOM(int NW)
     float FR[2] = {}, TH[2] = {}, TWM[2] = {}, TW[2] = {}, ECS[2] = {}, TC_[2] = {}, EHS[2] = {};
     float EWS1[2] = {}, EWS2[2] = {}, EWS[2] = {};
     float DLTHMN[2] = {}, DLTHMX[2] = {};
+    float W[2] = {};
 
     float EPBET, EPGAM, BETB, EPAM;
     double PI = 3.1415927;
     int KST[3] = {0,0,0};
-    float Z[2] = {0,0}, X[2] = {0,0};
+    float Z[2] = {0,0};
     float ALF = 0;
     float SNAL = 0, CSAL = 0, TGAL = 0, SNB = 0, CSB = 0, TGB = 0, SNAT = 0, CSAT = 0, TGAT = 0;
     float UU = 0;
@@ -125,12 +126,12 @@ void GEOM(int NW)
     if (Z[0] <= Z[1]) {
         UU = U;
         I12 = 0;                 //ðåäóêòîð
-        f_1 << "                                          ØÅÑÒÅÐÍß  ÊÎËÅÑÎ" << endl;
+        f_1 << "                                          ØÅÑÒÅÐÍß    ÊÎËÅÑÎ" << endl;
         }
     else {
         UU = static_cast<float>(1. / U);
         I12 = 1;                 //ìóëüòèïëèêàòîð
-        f_1 << "                                          ÊÎËÅÑÎ  ØÅÑÒÅÐÍß" << endl;
+        f_1 << "                                          ÊÎËÅÑÎ    ØÅÑÒÅÐÍß" << endl;
     }
     
     if (AW == 0) {
@@ -142,12 +143,12 @@ void GEOM(int NW)
         SCT(ALFTW, SNATW, CSATW, TGATW);
         AW = static_cast<float>(ZS * MN * CSAT / (2. * CSB * CSATW));
         
-        f_1 <<     "\nÌÅÆÎÑÅÂÎÅ ÐÀÑÑÒÎßÍÈÅ                       AW      " << AW;
+        f_1 <<     "\nÌÅÆÎÑÅÂÎÅ ÐÀÑÑÒÎßÍÈÅ                       AW " << setw(13) << AW;
 
         ZPRGMS(ALFTW, GRM, SEC);
         if (IPR >= 3) {
-            f_1 << "\nÏÅÐÅÄÀÒÎ×ÍÎÅ ×ÈÑËÎ                          U      " << UU;
-            f_1 << "\nÓÃÎË ÇÀÖÅÏËÅÍÈß (ÃÐÀÄ.ÌÈÍ.ÑÅÊ)          ALFTW      " << GRM << SEC << endl;
+            f_1 << "\nÏÅÐÅÄÀÒÎ×ÍÎÅ ×ÈÑËÎ                          U " << setw(13) << UU;
+            f_1 << "\nÓÃÎË ÇÀÖÅÏËÅÍÈß (ÃÐÀÄ.ÌÈÍ.ÑÅÊ)          ALFTW " << setprecision(2) << fixed << setw(15) << GRM << "." << setw(2) << SEC << endl;
         }
      }
     else {   // åñëè AW íå ðàâíî 0
@@ -158,18 +159,18 @@ void GEOM(int NW)
         float INVATW = TGATW - atan(TGATW);
         XS = static_cast<float>(ZS * (INVATW - INVAT) * 0.5 / TGAL);
         IDXS = 0;
-        cout << "\nGEOM: XS = " << XS << endl;
+        cout << "\nGEOM: XS = " << XS << "    X[0] = " << X[0] << "    X[1] = " << X[1] << "    X1 = " << X1 << "    X2 = " << X2 << endl;
 
-        if (flaw == 0) f_1 << "\nÌÅÆÎÑÅÂÎÅ ÐÀÑÑÒÎßÍÈÅ                 AW       " << AW;
+        if (flaw == 0) f_1 << "\nÌÅÆÎÑÅÂÎÅ ÐÀÑÑÒÎßÍÈÅ                 AW " << setw(14) << AW;
      //   if (flaw > 0)  
-            f_1 <<            "\nÊÎÝÔÔÈÖÈÅÍÒ ÑÓÌÌÛ ÑÌÅÙÅÍÈÉ           XS       " << round(XS * 1000) / 1000;
+            f_1 <<            "\nÊÎÝÔÔÈÖÈÅÍÒ ÑÓÌÌÛ ÑÌÅÙÅÍÈÉ           XS " << setw(14) << round(XS * 1000) / 1000;
      
-        if (X1 >= -5.) X[1] = XS - X1;
+        if (X1 > -5.) X[1] = XS - X1;
         else {
             if (X2 > -5) X[0] = XS - X2;
             else {
                 if (XS < -0.5 || XS > 2) {
-                    f_1 << "\nÊÎÝÔÔÈÖÈÅÍÒ ÑÓÌÌÛ ÑÌÅÙÅÍÈÉ            XS " << round(XS * 1000) / 1000 << endl;
+                    f_1 << "\nÊÎÝÔÔÈÖÈÅÍÒ ÑÓÌÌÛ ÑÌÅÙÅÍÈÉ            XS " << setw(14) << round(XS * 1000) / 1000 << endl;
                     f_1 << " (âíå äîïóñòèìûõ ïðåäåëîâ)" << endl;
                     f_1 << "\nðàçáèâêà êîýô. ñóììû ñìåùåíèé íå ïðîèçâîäèòñÿ      " << endl;
                     f_1 << "\nÐÀÑ×ÅÒ ÏÐÅÊÐÀÙÅÍ" << endl;
@@ -184,15 +185,14 @@ void GEOM(int NW)
                 }
             }
         }
-        f_1 << "\nÊÎÝÔÔÈÖÈÅÍÒÛ ÑÌÅÙÅÍÈß                 X      " << round(X[0] * 1000) / 1000 << "   " << round(X[1] * 1000) / 1000;
+        f_1 << "\nÊÎÝÔÔÈÖÈÅÍÒÛ ÑÌÅÙÅÍÈß                 X " << setw(10) << round(X[0] * 1000) / 1000 << setw(10) << round(X[1] * 1000) / 1000;
 
         ALFTW = atan(TGATW);
         ZPRGMS(ALFTW, GRM, SEC);
         if (IPR >= 3) {
-            f_1 << "\nÏÅÐÅÄÀÒÎ×ÍÎÅ ×ÈÑËÎ                    U      " << UU;
-            f_1 << "\nÓÃÎË ÇÀÖÅÏËÅÍÈß (ÃÐÀÄ.ÌÈÍ.ÑÅÊ)    ALFTW     " << GRM << SEC << endl;
+            f_1 << "\nÏÅÐÅÄÀÒÎ×ÍÎÅ ×ÈÑËÎ                    U " << setw(14) << UU;
+            f_1 << "\nÓÃÎË ÇÀÖÅÏËÅÍÈß (ÃÐÀÄ.ÌÈÍ.ÑÅÊ)    ALFTW " << setprecision(2) << fixed << setw(13) << GRM << "." << SEC << endl;
         }
-
    
     }
     if (U >= 1) {
@@ -213,10 +213,10 @@ void GEOM(int NW)
             EA[i] = static_cast<float>((Z[i] * (TGAA[i] - TGATW) / (2 * PI)));
             HZ = (DA[i] - DF[i]) / 2;
         }
-        f_1 << "\nÄÅËÈÒÅËÜÍÛÅ ÄÈÀÌÅÒÐÛ                  D  " << D[0] << "    " << D[1];
-        f_1 << "\nÍÀ×ÀËÜÍÛÅ ÄÈÀÌÅÒÐÛ                   DW  " << DW[0] << "    " << DW[1];
-        f_1 << "\nÄÈÀÌÅÒÐÛ ÂÅÐØÈÍ                      DA  " << DA[0] << "    " << DA[1];
-        f_1 << "\nÄÈÀÌÅÒÐÛ ÂÏÀÄÈÍ                      DF  " << DF[0] << "    " << DF[1];
+        f_1 << "\nÄÅËÈÒÅËÜÍÛÅ ÄÈÀÌÅÒÐÛ                  D " << setprecision(3) << fixed << setw(10) << D[0] << setw(10) << D[1];
+        f_1 << "\nÍÀ×ÀËÜÍÛÅ ÄÈÀÌÅÒÐÛ                   DW " << setw(10) << DW[0] << setw(10) << DW[1];
+        f_1 << "\nÄÈÀÌÅÒÐÛ ÂÅÐØÈÍ                      DA " << setw(10) << DA[0] << setw(10) << DA[1];
+        f_1 << "\nÄÈÀÌÅÒÐÛ ÂÏÀÄÈÍ                      DF " << setw(10) << DF[0] << setw(10) << DF[1];
         
         float DELZV = static_cast<float>(0.02);
         if (IMD == 0) DELZV = 0;
@@ -265,7 +265,7 @@ void GEOM(int NW)
         }
         
         float EPALF = EA[0] + EA[1];
-        if (IPR >= 3) f_1 << "\nÊÎÝÔÔ. ÒÎÐÖÎÂÎÃÎ ÏÅÐÅÊÐÛÒÈß       EPALF      " << EPALF;
+        if (IPR >= 3) f_1 << "\n\nÊÎÝÔÔ. ÒÎÐÖÎÂÎÃÎ ÏÅÐÅÊÐÛÒÈß       EPALF " << setprecision(3) << fixed << setw(14) << EPALF;
         
         for (int i = 0; i < 2; i++) {
             float ROU = static_cast<float>(ROP[i] + PI * MN * CSAL);
@@ -281,8 +281,8 @@ void GEOM(int NW)
             EPBET = static_cast<float>(BW / (PI * MN / SNB));
             EPGAM = EPBET + EPALF;
             BETB = atan(SNB * CSAL / sqrt(1 - (SNB * CSAL) * (SNB * CSAL)));
-            if (BE != 0 && EPBET >= 1 && IPR >= 3)  f_1 << "\nÊÎÝÔÔ. ÎÑÅÂÎÃÎ ÏÅÐÅÊÐÛÒÈß         EPBET      " << EPBET;
-            if (BE != 0 && EPBET < 1 && IPR >= 3)   f_1 << "\nÊÎÝÔÔ. ÎÑÅÂÎÃÎ ÏÅÐÅÊÐÛÒÈß   EPBET (ÌÅÍÜØÅ 1) " << EPBET;
+            if (BE != 0 && EPBET >= 1 && IPR >= 3)  f_1 << "\nÊÎÝÔÔ. ÎÑÅÂÎÃÎ ÏÅÐÅÊÐÛÒÈß         EPBET " << setw(14) << EPBET;
+            if (BE != 0 && EPBET < 1 && IPR >= 3)   f_1 << "\nÊÎÝÔÔ. ÎÑÅÂÎÃÎ ÏÅÐÅÊÐÛÒÈß EPBET (ÌÅÍÜØÅ 1) " << setw(11) << EPBET;
           
         }
         if (BE == 0) {
@@ -291,7 +291,7 @@ void GEOM(int NW)
                 EPAM = static_cast<float>((Z[0] * TGAG[0] + Z[1] * TGAG[1] - ZS * TGATW) / 2 / PI);
                 if (IPR >= 3) {
                     f_1 << "\n×ÀÑÒÜ ÊÎÝÔÔ. ÒÎÐÖÎÂÎÃÎ ÏÅÐÅÊÐÛÒÈß";
-                    f_1 << "\nÏÐÈ ÌÎÄÈÔÈÊÀÖÈÈ ÏÐÎÔÈËß ÇÓÁÜÅÂ     EPAM " << EPAM;
+                    f_1 << "\nÏÐÈ ÌÎÄÈÔÈÊÀÖÈÈ ÏÐÎÔÈËß ÇÓÁÜÅÂ     EPAM " << setw(13) << EPAM;
                 }
             }
 
@@ -299,7 +299,7 @@ void GEOM(int NW)
         }
         int II = CNT1(X, XMIN, DL, DP, SNA, EPALF, EPBET, EPGAM);  extern float BE;     //  KOHTPOËÜ KA×ECTBA ÇÀÖÅÏËÅÍÈß
      
-        cout << "GEOM: II = " << II << endl;  // îðãàíèçîâàòü ïðåðûâûâàíèå, åñëè II == 3:    IF(II.EQ.3)  GOTO 61
+        cout << "GEOM: after CNT1:  II = " << II << "   EPALF = " << EPALF << "   EPBET = " << EPBET << endl;  // îðãàíèçîâàòü ïðåðûâûâàíèå, åñëè II == 3:    IF(II.EQ.3)  GOTO 61
         if (II != 3) {
             for (int i = 0; i < 2; i++) {
                 SC[i] = static_cast<float>((PI * CSAL * CSAL / 2 + X[i] * sin(2 * ALF)) * MN);
@@ -309,8 +309,8 @@ void GEOM(int NW)
             }
             if (IPR >= 3) {
                 f_1 << "\n\n      ÇÓÁÎÌÅÐÍÛÅ ÏÀÐÀÌÅÒÐÛ" << endl;
-                f_1 << "\nÏÎÑÒÎßÍÍÀß ÕÎÐÄÀ ÇÓÁÀ                SC   " << round(SC[0] * 1000) / 1000 << "    " << round(SC[1] * 1000) / 1000;
-                f_1 << "\nÂÛÑÎÒÀ ÄÎ ÏÎÑÒÎßÍÍÎÉ ÕÎÐÄÛ           HC   " << round(HH[0] * 1000) / 1000 << "    " << round(HH[1] * 1000) / 1000 << endl;
+                f_1 << "\nÏÎÑÒÎßÍÍÀß ÕÎÐÄÀ ÇÓÁÀ                SC " << setw(9) << round(SC[0] * 1000) / 1000 << setw(9) << round(SC[1] * 1000) / 1000;
+                f_1 << "\nÂÛÑÎÒÀ ÄÎ ÏÎÑÒÎßÍÍÎÉ ÕÎÐÄÛ           HC " << setw(9) << round(HH[0] * 1000) / 1000 << setw(9) << round(HH[1] * 1000) / 1000 << endl;
             }
 
             for (int i = 0; i < 2; i++) {
@@ -360,16 +360,16 @@ void GEOM(int NW)
                 }
 
                 if (IIW1 > 0 && IIW2 == 0 && IPR >= 3) {
-                    f_1 << "\nÄËÈÍÀ ÎÁÙÅÉ ÍÎÐÌÀËÈ                   W   " << W[1];
-                    f_1 << "\n×ÈÑËÎ ÇÓÁÜÅÂ Â ÄËÈÍÅ ÎÁÙÅÉ ÍÎÐÌÀËÈ   ZW   " << ZN[1];
+                    f_1 << "\nÄËÈÍÀ ÎÁÙÅÉ ÍÎÐÌÀËÈ                   W " << setw(9) << W[1];
+                    f_1 << "\n×ÈÑËÎ ÇÓÁÜÅÂ Â ÄËÈÍÅ ÎÁÙÅÉ ÍÎÐÌÀËÈ   ZW " << setprecision(0) << fixed << setw(9) << ZN[1];
                 }
                 if (IIW2 > 0 && IIW1 == 0 && IPR >= 3) {
-                    f_1 << "\nÄËÈÍÀ ÎÁÙÅÉ ÍÎÐÌÀËÈ                   W   " << W[0];
-                    f_1 << "\n×ÈÑËÎ ÇÓÁÜÅÂ Â ÄËÈÍÅ ÎÁÙÅÉ ÍÎÐÌÀËÈ   ZW   " << ZN[0];
+                    f_1 << "\nÄËÈÍÀ ÎÁÙÅÉ ÍÎÐÌÀËÈ                   W " << setprecision(3) << fixed << setw(9) << W[0];
+                    f_1 << "\n×ÈÑËÎ ÇÓÁÜÅÂ Â ÄËÈÍÅ ÎÁÙÅÉ ÍÎÐÌÀËÈ   ZW " << setw(9) << ZN[0];
                 }
                 if (IIW1 == 0 && IIW2 == 0 && IPR >= 3) {
-                    f_1 << "\nÄËÈÍÀ ÎÁÙÅÉ ÍÎÐÌÀËÈ                   W   " << round(W[0] * 1000) / 1000 << "   " << round(W[1] * 1000) / 1000;
-                    f_1 << "\n×ÈÑËÎ ÇÓÁÜÅÂ Â ÄËÈÍÅ ÎÁÙÅÉ ÍÎÐÌÀËÈ   ZW       " << ZN[0] << "       " << ZN[1];
+                    f_1 << "\nÄËÈÍÀ ÎÁÙÅÉ ÍÎÐÌÀËÈ                   W " << setw(9) << round(W[0] * 1000) / 1000 << setw(9) << round(W[1] * 1000) / 1000;
+                    f_1 << "\n×ÈÑËÎ ÇÓÁÜÅÂ Â ÄËÈÍÅ ÎÁÙÅÉ ÍÎÐÌÀËÈ   ZW " << setw(9) << ZN[0] << setw(9) << ZN[1];
                 }
             }
 
@@ -384,19 +384,21 @@ void GEOM(int NW)
             }
 
             if (IPR >= 3) {
-                f_1 << "\nÒÎËÙÈÍÀ ÏÎ ÕÎÐÄÅ ÇÓÁÀ ÄÅËÈÒÅËÜÍÀß     S     " << round(SY[0] * 1000) / 1000 << "    " << round(SY[1] * 1000) / 1000;
-                f_1 << "\nÂÛÑÎÒÀ ÄÎ ÕÎÐÄÛ ÇÓÁÀ ÄÅËÈÒÅËÜÍÀß     HA     " << round(HAY[0] * 1000) / 1000 << "    " << round(HAY[1] * 1000) / 1000 << endl;  // ïîëó÷èëèñü çíà÷åíèÿ íà 0.001 ìåíüøèå
+                f_1 << "\nÒÎËÙÈÍÀ ÏÎ ÕÎÐÄÅ ÇÓÁÀ ÄÅËÈÒÅËÜÍÀß     S " << setw(9) << round(SY[0] * 1000) / 1000 << setw(9) << round(SY[1] * 1000) / 1000;
+                f_1 << "\nÂÛÑÎÒÀ ÄÎ ÕÎÐÄÛ ÇÓÁÀ ÄÅËÈÒÅËÜÍÀß     HA " << setw(9) << round(HAY[0] * 1000) / 1000 << setw(9) << round(HAY[1] * 1000) / 1000 << endl;  // ïîëó÷èëèñü çíà÷åíèÿ íà 0.001 ìåíüøèå
             }
 
             int KST4 = IST4;
             int KST5 = IST5;
+
+            cout << "GEOM before DOP1L     TH = " << TH[0] << "    " << TH[1] <<"    KST5 = " << KST5 << endl;
 
             DOP1L(MN, D, KST, KST4, KST5, FR, EHS, TH, EWS1, EWS2, EWS, TWM, TW, ECS, TC_);
 
             cout << "D = " << D[0] << "    " << D[1] << endl;
             cout << "DLTH = " << DLTH[0] << "    " << DLTH[1] << endl;
             cout << "EHS = " << EHS[0] << "    " << EHS[1] << endl;
-            cout << "TH = " << TH[0] << "    " << TH[1] << endl;
+            cout << "TH = " << TH[0] << "    " << TH[1] << endl;  // 0.11   0.11 íåâåðíî,  äîëæíî áûòü 0.2    0.2   - ñì. DOP1L
 
             for (int i = 0; i < 2; i++) {
 
@@ -405,15 +407,15 @@ void GEOM(int NW)
             }
             if (IPR >= 3) { //WRITE(1, 219) DLTHMN, DLTHMX
                 f_1 << "\nÏÐÅÄÅËÜÍÛÅ ÏÎÊÀÇÀÍÈß ÒÀÍÃÅÍ- ";
-                f_1 << "\nÖÈÀËÜÍÎÃÎ ÇÓÁÎÌÅÐÀ                 DLTH   " << round(DLTHMN[0] * 1000) / 1000 << "       " << round(DLTHMN[1] * 1000) / 1000;  // 0.2    0.25    âìåñòî   0.2      0.25
-                f_1 << "\n                                          " << round(DLTHMX[0] * 1000) / 1000 << "       " << round(DLTHMX[1] * 1000) / 1000;  // 0.4    0.45             0.6      0.65
+                f_1 << "\nÖÈÀËÜÍÎÃÎ ÇÓÁÎÌÅÐÀ                 DLTH " << setw(9) << round(DLTHMN[0] * 1000) / 1000 << setw(9) << round(DLTHMN[1] * 1000) / 1000;  // 0.2    0.25    âìåñòî   0.2      0.25
+                f_1 << "\n                                        " << setw(9) << round(DLTHMX[0] * 1000) / 1000 << setw(9) << round(DLTHMX[1] * 1000) / 1000;  // 0.4    0.45             0.6      0.65
             }
 
             if (IDXS == 1 && BE != 0 && IPR > 6) {
-                f_1 << "\nÊÎÝÔ.ÑÓÌÌÛ ÑÌÅÙÅÍÈÉ ÂÍÅ ÐÅÊÎÌÅÍÄÓÅÌÛÕ ÏÐÅÄÅËÎÂ";
-                f_1 << "\n ÎÒ -0.5 ÄÎ 0.5     XS = " << setw(6) << XS;
-                f_1 << "\n ÐÅÊÎÌÅÍÄÓÅÒÑß ÈÇÌÅÍÈÒÜ ÏÀÐÀÌÅÒÐÛ ÏÅÐÅÄÀ×È";
-                f_1 << "\n (×ÈÑËÎ ÇÓÁÜÅÂ,ÓÃÎË ÍÀÊËÎÍÀ)";
+                f_1 << "\n\nÊÎÝÔ.ÑÓÌÌÛ ÑÌÅÙÅÍÈÉ ÂÍÅ ÐÅÊÎÌÅÍÄÓÅÌÛÕ ÏÐÅÄÅËÎÂ";
+                f_1 << "\nÎÒ -0.5 ÄÎ 0.5     XS = " << setw(6) << XS << endl;
+                f_1 << "\nÐÅÊÎÌÅÍÄÓÅÒÑß ÈÇÌÅÍÈÒÜ ÏÀÐÀÌÅÒÐÛ ÏÅÐÅÄÀ×È (×ÈÑËÎ ÇÓÁÜÅÂ,ÓÃÎË ÍÀÊËÎÍÀ)" << endl;
+
 
             }
 
@@ -443,8 +445,11 @@ void GEOM(int NW)
                 DGKP(I12, DB, BETB, DP, ROP, DL, ROL, DELZV, DG, ROG, DU, DV, RLM, RLMIN, RKEPS, PALF, PX, SNA, TETP, TETV, DZTP, DZTV);
             }
             
- //           TABLP1(Z, KST, KST4, KST5, DLTH, SC,
- //               HH, SY, HAY, D, DA, HZ, EHS, TH, IIW1, IIW2);
+            TABLP1(Z, KST, KST4, KST5, DLTH, W, SC, HH, SY, HAY, D, DA, HZ, EHS, TH, IIW1, IIW2);
+
+//            CALL TABLP1(IR, M, Z, BET, X, KST, KST4, KST5, DLTH, W, SC,
+//                *HH, SY, HAY, D, DA, HZ, EHS, TH, IIW1, IIW2,
+//                *ALF, HAZV, HLZV, CZV)
 
             D1 = D[0];
             D2 = D[1];
@@ -460,8 +465,11 @@ void GEOM(int NW)
             EPSB = EPBET;
             ZH = sqrt(2. * cos(BETB) / TGATW) / CSAT;
             ZEPS = sqrt((4. - EPSA) / 3.);
-
-            cout << "GEOM: ***   EPSA = " << EPSA << "   EPSB = " << EPSB << " ZH =  " << ZH << " ZEPS =  " << ZEPS << " D1 =  " << D1 << " D2 =  " << D2 << endl;
+            if (BE != 0) {
+                ZEPS = sqrt(1. / EPSA);
+                if (EPSB < 1.) ZEPS = sqrt((4. - EPSA) * (1. - EPSB) / 3. + EPSB / EPSA);
+            }
+            cout << "GEOM: ***   EPSA = " << EPSA << "   EPSB = " << EPSB << " ZH =  " << ZH << " ZEPS =  " << ZEPS << " D1 =  " << D1 << " D2 =  " << D2 << "     X[1] =  " << X[1] << endl;
         }
        /*
 
@@ -533,24 +541,15 @@ void GEOM(int NW)
 
             RETURN
        */
-        
-        return;
+        cout << "GEOM: ***        X[1] =  " << X[1] << endl;
+ //     return;
     }
 
-    
-    
-    
-    /*
-  C	IF(U.GE.1.) THEN
+    f_1 << "\n_________________" << endl;
 
-
-
-
-
- */
-
-    
     fi.close();
+
+    return;
 };
 /*
 SUBROUTINE GEOM(IR, IPR, IVP, Z1, Z2, M, ALF, BET, X1, X2, IAX, NW,
@@ -915,6 +914,7 @@ SUBROUTINE GEOM(IR, IPR, IVP, Z1, Z2, M, ALF, BET, X1, X2, IAX, NW,
             *' ÏÐÅÄÅËÜÍÛÅ ÏÎÊÀÇÀÍÈß ÒÀÍÃÅÍ-' /
             *' ÖÈÀËÜÍÎÃÎ ÇÓÁÎÌÅÐÀ                 DLTH', 2F10.3 /
             *'                                        ', 2F10.3)
+            * 
         IF(IDXS.EQ.1.AND.BET.NE.0.AND.IPR.GT.6) WRITE(1, 232) XS
         232 FORMAT(/ 1X, 'ÊÎÝÔ.ÑÓÌÌÛ ÑÌÅÙÅÍÈÉ ÂÍÅ ÐÅÊÎÌÅÍÄÓÅÌÛÕ ÏÐÅÄÅËÎÂ' /
             *' ÎÒ -0.5 ÄÎ 0.5', 5X, 'XS = ', F6.3//

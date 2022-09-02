@@ -51,6 +51,9 @@ void SGMHKC(float SIGH, float SIGHM, float WHT, float ROV, float HT, float HV, f
         if (HT > HH)  SGMHKP = SGMHKP = 3.6 * HEFF;                   // НОЮЯМЮЪ ГНМЮ Б СОpНВМЕММНЛ ЯКНЕ
 
         float SGHKPU = SGMHKP / SHKMIN[IG-1];
+
+        cout << "SGMHKC     SGHKPU = " << SGHKPU << "    SIGH = " << SIGH << "    I = " << I << endl;
+
         if (SGHKPU < SIGH && I == 1) {
             f_1 << "\n\n    цксахммюъ йнмрюйрмюъ бшмнякхбнярэ ьеярепмх ме цюпюмрхпнбюмю\n";
             f_1 << "\n      сякнбмне дносяй. цксахммне мюопъфемхе, лОЮ   SGHKPU " << SGHKPU;

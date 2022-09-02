@@ -3,33 +3,46 @@
 
 using namespace std;
 
-float YLIFE(int ITF, int ITF0, int ITF1, float SFLIM, float SFR[100], float SFRR, float NC[100], int IMF, float NFE)
+float YLIFE(int ITF, int ITF0, int ITF1, float SFLIM, float SFR[100], float SFRR, float NC[100], int IMF, float& NFE)
 {
-    cout << "YLIFE:   ITF = " << ITF << "   ITF0 = " << ITF0 << "   ITF1 = " << ITF1 << "   SFLIM = " << SFLIM << "   SFRR = " << SFRR << "   IMF = " << IMF << "   NFE = " << NFE << endl;
+    // ITF1 - количество ступеней, в которых  SHR < SHLIM
+    // NFE - Эквивалентное число циклов напряжений при расчете изгибной выносливости (см. ГОСТ стр 106)
+
+    cout << "YLIFE 1:   ITF = " << ITF << "   ITF0 = " << ITF0 << "   ITF1 = " << ITF1 << "   SFLIM = " << SFLIM << "   SFRR = " << SFRR << "   IMF = " << IMF << "   NFE = " << NFE << endl;
     for (int i = 0; i < ITF; i++) cout << "    NC[" << i << "] = " << NC[i] << endl;
     for (int i = 0; i < ITF; i++) cout << "   SFR[" << i << "] = " << SFR[i] << endl;
 
     NFE = 0.;
-    float NFLIM = 4.;
+    float NFLIM = 4.;  // базовое число циклов нагружения (млн.)
     float QF1 = 6.;
     if (IMF == 1) QF1 = 9.;
     float QF2 = 40.;
     int I0 = 1 + ITF0;
 
-    cout << "YLIFE:   I0 = " << I0 << endl;
+    cout << "YLIFE 2:   I0 = " << I0 << endl;
 
     for (int i = I0 - 1; i < ITF; i++) {
+        cout << "YLIFE 3:   i = " << i << "    ITF0 = " << ITF0 << "    ITF1 = " << ITF1 << endl;
         if (ITF1 <= ITF0) NFE = NFE + NC[i] * pow((SFR[i] / SFRR), QF2);
+        cout << "YLIFE 4:   i = " << i << "    NFE = " << NFE << endl;
         if (ITF1 > ITF0 && i <= ITF1) NFE = NFE + NC[i] * pow((SFR[i] / SFRR), QF1);
+        cout << "YLIFE 5:   i = " << i << "    NFE = " << NFE << endl;
         if (ITF1 > ITF0 && i > ITF1) {
             float KS = pow((SFLIM / SFRR), QF2);
             NFE = NFE + NC[i] * pow((SFR[i] / SFRR), QF1) * KS;
         }
+        cout << "YLIFE 6:   i = " << i << "    NFE = " << NFE << endl;
     }
+
+    cout << "YLIFE 7:   NFE = " << NFE << endl;
+
     float YN = 0;
-    if (NFE <= NFLIM && IMF == 0)   YN = pow((NFLIM / NFE), 0.167);
-    if (NFE <= NFLIM && IMF == 1)   YN = pow((NFLIM / NFE), 0.111);
+    if (NFE <= NFLIM && IMF == 0)   YN = pow((NFLIM / NFE), 0.167);      // qF = 6 (ГОСТ стр 33)
+    if (NFE <= NFLIM && IMF == 1)   YN = pow((NFLIM / NFE), 0.111);      // qF = 9 (ГОСТ стр 33)
     if (NFE > NFLIM)   YN = pow((NFLIM / NFE), 0.05);
+
+    cout << "YLIFE 8:   YN = " << YN << endl;
+
     if (IMF == 0 && YN > 4.0) YN = 4.0;
     if (IMF == 1 && YN > 2.5) YN = 2.5;
     float ylife = YN;

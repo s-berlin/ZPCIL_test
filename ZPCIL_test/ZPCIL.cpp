@@ -16,8 +16,13 @@ using namespace std;
 
 //========== Переменные по редуктору
 char IR[20] = {};  // идентификатор расчета 
-int IT = 0, IRV = 0, IPR = 6, IE = 1, ISR = 1, IN = 0;
+int IT = 0, IRV = 0, IPR = 6, ISR = 1, IN = 0;
+int IE = 1;
+//  IE = 1 исх. данные и результаты расчета в CИ,
+//  IE = 2 исх. данные и результаты расчета в TEXH.CИСТЕМЕ
+//  IE = 3 исх. данныеB TEXH.CИСТЕME, результаты расчета в CИ
 float L = 0, WH = 0, N1R = 0;      // ресурс, часов
+float RS, RC, CH;     // ЧИСЛО РАБОЧИХ СУТОК В ГОДУ, ЧИСЛО РАБОЧИХ ЧАСОВ В СУТКИ, ЧИСЛО РАБОЧИХ ЦИКЛОВ В ЧАС
 float T1R = 0, TMAX = 0;     // момент на входящем валу, Нм
 float TQ[20] = {}, TC[20] = {}, RM[20] = {};
 float TQ1[100] = {}, TC1[100] = {}, RM1[100] = {};
@@ -30,7 +35,7 @@ fstream f_1;    // файл для результата    //***
 //========== Переменные по ступени
 int IVP = 0;                         // тип ступени
 float Z1 = 0, Z2 = 0, U = 0;         // числа зубьев шестерни и колеса
-float MN = 0, BE = 0, X1, X2, X[2];        // модуль, угол наклона, коэффициенты смещения
+float MN = 0, BE = 0, X1, X2, X[2] = { 0,0 };        // модуль, угол наклона, коэффициенты смещения
 int flaw;
 float AW, B1, B2, D1, D2;            // межосевое расстояние ширины шестерни и колеса
 float AL, HA, HL, CZV;               // угол профиля, коэффициенты: высоты головки, граничной высоты, радиального зазора  
@@ -55,9 +60,133 @@ float DA1 = 0 , DA2 = 0, DB1 = 0, DB2 = 0, ALFTW = 0;
 
 int main()
 {
+	string str;
+	char ch = ' ';
+	int i = 0;
+	fstream fi;
+
+	fi.open("NOMST.DAT", fstream::in);
+
+//	getline(fi, str);  // пропустить строку
+
+	fi >> IS;
 
     DRM();
+	/*
+	C------------ - Прочесть U, КПД  и  KSP--------------
+		IF(IS.GT.1) THEN
+		OPEN(UNIT = 2, FILE = 'TIPST.ACC', STATUS = 'OLD')
+		do 699 I = 1, IS - 1
+			READ(2, *) J, U(I), KPD(I), KSP(I)
+			699		CONTINUE
+			C                READ(2, *)
+			C                READ(2, *) (U(I), I = 1, IS - 1)
+			C		IF(L.NE.0) READ(2, *) (KPD(I), I = 1, IS - 1)
+			C		IF(L.NE.0) READ(2, *) (KSP(I), I = 1, IS - 1)
+			CLOSE(2)
+			END IF
+			*/
 	VYVDR();
+	
+	/*   матрицы
+	IF(L.LT.-1.) THEN
+	DO 7 I=1,IT
+	DO 6 J=1,IN
+	   TQ(10*(I-1)+J)=TQM(I)
+	   RM(10*(I-1)+J)=RMM(J)
+	   IF(TQM(I).LT.0.) RM(10*(I-1)+J)=-RMM(J)
+	   TC(10*(I-1)+J)=TCM(I,J)
+	6	CONTINUE
+	7   CONTINUE
+	ITN=IT*IN
+	DO 12 J=1,ITN
+	   TC(J)=TC(J)/100.
+   12	CONTINUE
+	IT=ITN
+	END IF
+	*/
+	
+	
+	
+/*
+C   пpи  L = 0.   считается только  геометpия
+	IF(IS.EQ.1)       WRITE(7,703) IT,IN
+  703  FORMAT(' ZPU bef IF(L.EQ.0.)==IT,IN: ',2I3)
+	EV=1.
+	  IF(L.EQ.0.) GOTO 10
+*/
+
+
+	if (IT > 1) {  //------------- Преобразования циклограммы
+		UPORTQ(IT1, TQ1, TC1, RM1, IT2, TQ2, TC2, RM2, TN, EV, IS);
+	}
+	else {
+		IT1 = IT;
+		TQ1[0] = TQ[0];
+		if (IRV == -1) {
+			TC1[0] = TC[0] * .5;
+			TN = 1.;
+		}
+		else TC1[0] = TC[0];
+		
+		RM1[0] = RM[0];
+	}
+	cout << "ZPCIL after UPORTQ TQ[0] = " << TQ[0] << " IT = " << IT << endl;
+
+//   10   OPEN (UNIT=2,FILE='FILE2',STATUS='OLD')
+//	IF(IS.EQ.1)       WRITE(7,704) L,WH,IT,IN
+//  704  FORMAT(' ZPU af UPORTQ=L,WH,IT,IN:',2F10.1,2I3)
+
+	if (IS == 1) cout << "ZPCIL:    Расчет цилиндрических зубчатых передач " << endl;  // ??? IS - не определено!
+
+/*
+C---------- Пересчет нагрузок с учетом U , КПД и KSP предыдущих ступеней
+
+	IF (IS.GT.1) THEN
+	PRS=1
+	UR=1
+	DO J=1,IS-1
+		PRS=PRS*U(J)*KPD(J)*KSP(J)
+		UR=UR*U(J)
+	END DO
+		DO I=1,IT
+		RM(I)=RM(I)/UR
+		TQ(I)=TQ(I)*PRS
+	END DO
+		DO I=1,IT1
+		RM1(I)=RM1(I)/UR
+			TQ1(I)=TQ1(I)*PRS
+	END DO
+		  TMAX=TMAX*PRS
+		  IF(L.LT.-1.) WH=WH/UR
+	  IF(N1R.GT.1) N1R=N1R/UR
+	END IF
+*/
+
+
+/*
+	DO III=1,IS
+	DO II=1,100
+	READ (2,100) STR
+	STR=STR(1:3)
+	IF (STR.EQ.'IVP') GO TO 1111
+	END DO
+1111	CONTINUE
+	END DO
+
+C  ввод исходных данных по ступеням pедуктоpа (в цикле)-(T1)
+
+		READ(2,*) IVP
+	WRITE(10,11111)
+11111	format ('*****')
+	WRITE(10,*) IVP
+		WRITE(*,333) IS
+  333  FORMAT(/'  ИДЕТ РАСЧЕТ  ',I2,'-Й СТУПЕНИ РЕДУКТОРА')
+		 JJ=0
+C---------- Расчет цилиндрической передачи внешнего зацепления
+		IF(IVP.EQ.0)  CALL CILEV (JJ,IR,IVP,IS,ISR,L,WH,TMAX,
+	*/
+	
 	
 	// -------------Преобразования циклограммы
 	UPORTQ(IT1, TQ1, TC1, RM1, IT2, TQ2, TC2, RM2, TN, EV, IS);
@@ -69,7 +198,7 @@ int main()
 // 
 	IVP = 0;
 	int JJ = 0;
-	if (IVP == 0) CILEV(IT1, TQ1, TC1, RM1);
+	if (IVP == 0) CILEV(IS, IT1, TQ1, TC1, RM1);
 //		IF(IVP.EQ.0)  CALL CILEV(JJ, IR, IVP, IS, ISR, L, WH, TMAX,
 //			*IRV, IPR, IE, N1R, TNZ,
 //			*IT1, TQ1, TC1, RM1, IN, IT, TQ, TC, RM, TN)

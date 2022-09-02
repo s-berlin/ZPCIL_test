@@ -185,5 +185,8 @@
     <ClInclude Include="PRCPI.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
+    <ClInclude Include="RUZC.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

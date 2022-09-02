@@ -34,6 +34,11 @@ float YFS(float ZV, float X, float HM, float HA, float AL) {
     float F9 = A[50] * Z * Z * AL + A[52] * Z * Z * HM + A[53] * Z * Z * X + A[54] * Z * Z * Z;
     float yfs = 31.891 + F1 + F2 + F3 + F4 + F5 + F6 + F7 + F8 + F9 + FD;
 
+    cout << "YFS:  ZV = " << ZV << "  X = " << X << "  HM = " << HM << "  HA = " << HA << "  AL = " << AL << endl;
+    cout << "YFS:  FD = " << FD << "  F1 = " << F1 << "  F2 = " << F2 << "  F3 = " << F3 << "  F4 = " << F4 << endl;
+    cout << "YFS:  F5 = " << F5 << "  F6 = " << F6 << "  F7 = " << F7 << "  F8 = " << F8 << "  F9 = " << F9 << endl;
+    cout << "YFS:  yfs = " << yfs << "          Z = " << Z << endl;
+
     return yfs;
 }
 /*

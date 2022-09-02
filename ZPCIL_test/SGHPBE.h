@@ -70,6 +70,9 @@ float SGHPBE(float SGHP1, float SGHP2, float AA1, float AA2, float ALTW, float Z
 
     sghpbe = sqrt(SS / EPSA);
     float SGPMIN = min(SGHP1, SGHP2);
+
+    cout << "SGHPBE: ***  SGHP1 = " << SGHP1 << "    SGHP2 = " << SGHP2 <<  "    sghpbe = " << sghpbe << "    SGPMIN = " << SGPMIN << endl;
+
     if (sghpbe < SGPMIN) sghpbe = SGPMIN;
 
     cout << "SGHPBE:      SS = " << SS << "    FIP = " << FIP << "    SGMAX = " << SGMAX << "    SGMIN = " << SGMIN << "    sghpbe = " << sghpbe << endl;

@@ -55,7 +55,7 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
       float Z0,
       float TN, float TNZ,
       float SFLB1Z, float SFLB2Z, float SFPM1Z, float SFPM2Z,
-      float TQF, float TQFP, float TQEV, float RMP, float EV, float EP,
+      float TQF, float& TQFP, float TQEV, float& RMP, float EV, float EP,
       float PF1, float PF2, float SFMF1, float SFMF2, float SN1, float SN2, float SFG1, float SFG2, float SFF1, float SFF2) {
     
     float HRC1 = 0, HB1 = 0, HV1 = 0, HRC2 = 0, HB2 = 0, HV2 = 0;
@@ -77,6 +77,7 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
     float KF = 0, SIGF01 = 0, SIGF02 = 0, KFV1 = 0, KFB1 = 0, KFA1 = 0, KF1 = 0, YN1 = 0, YN2 = 0, SIGFP1 = 0, SIGFP2 = 0;
     float KFAA[2] = { 0,0 }, YF0[2] = { 0,0 }, SFR[2][100] = { 0 }, NFE1 = 0, NFE2 = 0;
     int IRS[2] = { 0,0 };
+    float NSF[2] = { 0,0 };
 
     //      пpисвоение начальных значений и констант :
     //  !!!!!!!!!!
@@ -106,11 +107,11 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
     float SIGF[2] = { 0, 0 }, NCF[2] = { 0, 0 };
     int IFI[2] = { 0, 0 }, ITF0[2] = { 0, 0 }, ITF1[2] = { 0, 0 }, ITF[2] = { 0, 0 };
 
-    float EPSG = EPSA + EPSB;
-    float BEG = BE * 57.3;
+    float EPSG = EPSA + EPSB; // суммарный коэффициент = торцового + осевого перекрытия
+    float BEG = BE * 57.3;    // угол наклона зуба в градусах
     float PSIBD = BW / DSH;
 
-    cout << "IZGIBU:    EPSG = " << EPSG << "      BEG = " << BEG << "      BW = " << BW << "      DSH = " << DSH << "      PSIBD = " << PSIBD << endl;
+    cout << "IZGIBU:    EPSG = EPSA + EPSB = " << EPSA << " + " << EPSB << " = " << EPSG << "   BEG = " << BEG << "    BW = " << BW << "   DSH = " << DSH << "    PSIBD = " << PSIBD << endl;
             
  //      пеpевод твеpдостей
 
@@ -136,12 +137,12 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
        //   уточненный pасчет пpямозубых пеpедач
         FPB1 = FPB(IST2, MN, D1);
         FPB2 = FPB(IST2, MN, D2);
-        CONST = .78 * BW * cos(ALTW) * sqrt(FPB1 * FPB1 + FPB2 * FPB2);
+        CONST = .78 * BW * cos(ALFTW) * sqrt(FPB1 * FPB1 + FPB2 * FPB2);
      
         if (SGN == 1) KFAB0(CAA, CVV, YFSA, YFSU);
       //  else KFAB01(Z0, DA1, DA2, DB1, DB2, ALTW, Z1, Z2, X1, X2, U, MN, HA, AL, CAA, CVV, YFSA, YFSU);
 
-        cout << "IZGIBU:    CAA = " << CAA << "      CVV = " << CVV << "      YFSA = " << YFSA << "      YFSU = " << YFSU << endl;
+        cout << "IZGIBU: ****   CAA = " << CAA << "      CVV = " << CVV << "      YFSA = " << YFSA << "      YFSU = " << YFSU << "      ALFTW = " << ALFTW << endl;
 
             KFA = 1.;
             YBET = 1.;
@@ -150,18 +151,19 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
     }
     if (BE > 0) {   // косой зуб
 
-        YF1 = YFS(ZVE1, X1, 0., HA, AL);
+        YF1 = YFS(ZVE1, X[0], 0., HA, AL);
 
         if (IMF1 == 2) YF1 = 3.61 + .53 * X1 * X1 + 25.3 / ZVE1 - 37.6 * X1 / ZVE1;
 
-        YF2 = YFS(ZVE2, X2, 0., HA, AL);
-
-        cout << "IZGIBU:    YF1 = " << YF1 << "      YF2 = " << YF2 << endl;
+        YF2 = YFS(ZVE2, X[1], 0., HA, AL);  // коэф. формы зуба
 
             //   коэфф.фоpмы зуба для эпицикла
       //***  if (SGN < 0.) YF2 = YFII(ZVE2, X2, Z0);
 
         if (IMF2 == 2 && SGN == 1.) YF2 = 3.61 + .53 * X2 * X2 + 25.3 / ZVE2 - 37.6 * X2 / ZVE2;
+
+        cout << "IZGIBU: 7041:  YF1 = " << YF1 << "     YF2 = " << YF2 << "     ZVE1 = " << ZVE1 << "     ZVE2 = " << ZVE2 << endl;
+
         YBET = 1. - EPSB * BEG / 120.;
         if (YBET <= 0.7) YBET = .7;
         YEPS = 1. / EPSA;
@@ -177,7 +179,8 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
     SGFLIM[1] = SGMFLB(IG2, PR, SF2, SFG2, HB2, HRCK2);
     if (SFLB2Z > 0.)  SGFLIM[1] = SFLB2Z;
 
-    cout << "IZGIBU:    SGFLIM[0] = " << SGFLIM[0] << "      SGFLIM[1] = " << SGFLIM[1] << endl;
+    cout << "IZGIBU: 7030 ---   SGFLIM[0] = " << SGFLIM[0] << "   IG1 = " << IG1 << "  PR = " << PR << "  SF1 = " << SF1 << "  SFG1 = "<< SFG1 << "  HB1 = " << HB1 << "   HRCK1 = " << HRCK1 << endl; // ok
+    cout << "IZGIBU:    SGFLIM[0] = " << SGFLIM[0] << "      SGFLIM[1] = " << SGFLIM[1] << endl; 
     cout << "IZGIBU:    SF1 = " << SF1 << "   SF2 = " << SF2 << " SFG1 = " << SFG1 << "   SFG2 = " << SFG2 << endl;
 
     if (IVR != 1) {
@@ -237,6 +240,9 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
     //    705  FORMAT(' IZGIBU 705: YT1,YZ1,YG1,YD1,YA1,YDLT,YR1,YX1' /
     //        *3X, 8F9.3 / '-IZGIB-- YT2,YZ2,YG2,YD2,YA2,YDLT,YR2,YX2' / 3X, 8F9.3)
 
+    cout << "IZGIBU: 705 ---  YT1 = " << YT1 << "  YZ1 = " << YZ1 << "  YG1 = " << YG1 << "  YD1 = " << YD1 << "  YA1 = " << YA1 << "  YDLT = " << YDLT << "  YR1 = " << YR1 << "  YX1 = " << YX1 << endl;
+    cout << "IZGIBU: 705 ---  YT2 = " << YT2 << "  YZ2 = " << YZ2 << "  YG2 = " << YG2 << "  YD2 = " << YD2 << "  YA2 = " << YA2 << "  YDLT = " << YDLT << "  YR2 = " << YR2 << "  YX2 = " << YX2 << endl;
+
     float SFLM1 = SGFLIM[0] * YT1 * YZ1 * YG1 * YD1 * YA1 * YDLT * YR1 * YX1;
     float SFLM2 = SGFLIM[1] * YT2 * YZ2 * YG2 * YD2 * YA2 * YDLT * YR2 * YX2;
     
@@ -245,9 +251,10 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
     SGFG[1] = AGF * SFLM2;
     //   базовое число циклов - 4 млн.
     
-    float DLTFR = DLTF(IH, BE, IMD);
+    float DLTFR = DLTF(IMD, BE); // коэф., учитывающий влияние вида зубчатой передачи и модификации профиля зубьев
 
-    cout << "IZGIBU:    DLTFR = " << DLTFR << endl;
+    cout << "IZGIBU: 7048 ---   IH = " << IH << "  BE = " << BE << "   IMD = " << IMD << "   DLTFR = " << DLTFR << endl;
+
         // IKFV = 0 - расчетное напр. > повреждающего;
         // IKFV = 1--расчетное напр. < повреждающего - это для заполн.матр.kfv
     int IKFV = 0;
@@ -263,33 +270,44 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
                 NC[0][i] = RM[i] * 60. * HH * TC[i] * CZ1 / 1.E6;
                 NC[1][i] = NC[0][i] * CZ2 / (CZ1 * U);
             }
+            cout << "IZGIBU: NC[0][" << i << "] = " << NC[0][i] << "        NC[1][" << i << "] = " << NC[1][i] << endl;
+            float FTF = 2000. * TQ[i] / D1;   // окружная сила на делительном цилиндре
+            cout << "IZGIBU: Окружная сила на делительном цилиндре  FTF = 2000. * TQ[i] / D1 = 2000 * " << TQ[i] << " / " << D1 << " = " << FTF << endl;
 
-            float FTF = 2000. * TQ[i] / D1;
             float K0 = FTF * (UU + SGN) / (BW * DSH * UU);
 
             if (BE != 0.) {
                 SIGF0[0] = YF1 * YBET * YEPS * FTF / (MN * B1);
                 SIGF0[1] = YF2 * YBET * YEPS * FTF / (MN * B2);
             }
+            
+            cout << "IZGIBU: ++     YBET = " << YBET << "   YEPS = " << YEPS << "   FTF = " << FTF << "   MN = " << MN << endl;
+            cout << "IZGIBU: ++     YF1 = " << YF1 << "   B1 = " << B1 << "    SIGF0[0] = " << SIGF0[0] << endl;
+            cout << "IZGIBU: ++     YF2 = " << YF2 << "   B2 = " << B2 << "    SIGF0[1] = " << SIGF0[1] << endl;
+
             float KA = 1.;
             float V = PI * D1 * RM[i] / 6.E4;
             float WVR = WV(AW, UU, MN, V, IST2, DLTFR, GM);
+            cout << "IZGIBU: 7049 ---  AW = " << AW << "  UU = " << UU << "   MN = " << MN << "  V = " << V << "  IST2 = " << IST2 << "  DLTFR = " << DLTFR << "  GM = " << GM << "  WVR = " << WVR << endl; // неверно
 
-            float kfv = FTF / BW;
+            float kfv = FTF / BW;   // FTF - окружная сила на делительном цилиндре
             if (kfv < 150) kfv = 150;
 
             float KFV = 1. + WVR / kfv;
+            cout << "IZGIBU: KFV = " << KFV << "      WVR = " << WVR << "      kfv = " << kfv << "      FTF = " << FTF << "      BW = " << BW << endl;
 
             KFVM[i] = KFV;
             //        WRITE(7, 7050) I, TQ[i], FTF, RM[i], V, WVR, KFVM[i]
             //        7050  FORMAT(' * IZGIBU 7050: I,TQ[i] ,FTF,RM[i] ,V,WVR,KFVM[i] ' /                    *I3, 3F9.1, 3F9.5)
+
+            cout << "IZGIBU: 7050 ---  i = " << i << "  TQ[" << i << "] = " << TQ[i] << "  FTF = " << FTF << "  RM[" << i << "] = " << RM[i] << "  V = " << V << "  WVR = " << WVR << "  KFVM[" << i << "] = " << KFVM[i] << endl; // ok
 
             if (IKFV > 0) continue;
 
 
             if (IKG == 0) {
                 float AAB = .6;
-                float KHB0 = AKHB0(EPSA, EPSG, MN, D1, BW, ZEPS, FTF, KFV, FKE, AAB);
+                float KHB0 = AKHB0(EPSA, EPSG, MN, D1, BW, ZEPS, FTF, KFV, FKE, AAB);   
                 float KFB = AKFBTP(KHB0, MN, BE, BW, EPSA);
             }
 
@@ -317,7 +335,7 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
             // 6 continue
             if (BE != 0 && IKG != 10) {
                 float AAL = 0.4;
-                KFA = AKHA(EPSA, EPSG, MN, D1, D2, BW, FTF, KFV, KFB, AAL);
+                KFA = AKHA(EPSA, EPSG, MN, D1, D2, BW, FTF, KFV, KFB, AAL, FPB1, FPB2);
                 if (EPSB > EPSA) KFAMAX = EPSA * EPSA / EPSB;
                 if (EPSB < EPSA) KFAMAX = EPSA;
                 if (EPSB < 1.0) KFAMAX = EPSG;
@@ -341,7 +359,7 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
                 SIGF01 = SIGF0[0];
                 SIGF02 = SIGF0[1];
 
-                KFV1 = KFV;
+                KFV1 = KFV;  // коэф. учитывающий динамическую нагрузку, возникающую в зацеплении до зоны резонанса
                 KFB1 = KFB;
                 //                  WRITE(7, 7052) KFB1
                 //                  7052  FORMAT(' IZGIBU 7052: KFB1 ', F9.3)
@@ -349,11 +367,13 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
                 KF1 = KF;
                 if (BE != 0.) IJ = 1;
             }
+            cout << "IZGIBU: 7051 Коэф., учит. неравномерность распределения нагрузки по длине контактных линий  KFB = " << KFB << "     IKG = " << IKG << endl;   // ok
+
             // 81 continue
-            for (int J = 0; J < 2; J++) {    // DO 60
+            for (int J = 0; J < 2; J++) {    // DO 60 ==========================================================================
             
-                if (L >= -1) {
-                    if (!(NC[J - 1][i - 1] > 0.001 || IFI[J - 1] == 1)) {     //  GOTO 9
+                if (L >= -1) {   // не матрицы
+                    if (!(NC[J][i] > 0.001 || IFI[J] == 1)) {     //  GOTO 9
                         ITF0[J] = i;
                         ITF1[J] = i;
                             //  ваpиант, когда все  NC(J, I) меньше  1000 циклов: ITF0(J) = IT
@@ -399,12 +419,15 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
                     
                     if (J == 0) SIGF0[0] = FTF * YF0[0] / (B1 * MN);
                     else        SIGF0[1] = FTF * YF0[1] / (B2 * MN);
+                    
+                    cout << "IZGIBU: +++    SIGF0[0] = " << SIGF0[0] << "   SIGF0[1] = " << SIGF0[1] << endl;
 
                     //	if (IVP == 5) SIGF0(J) = SIGF0(J) * SQRT(U * U + 1.)
                                         
                     if (IJ != 1) {
                         SIGF01 = SIGF0[0];
                         SIGF02 = SIGF0[1];
+                        cout << "IZGIBU: ++++   SIGF0[0] = " << SIGF0[0] << "   SIGF0[1] = " << SIGF0[1] << endl;
                         if (J == 1) IJ = 1;
                     }
                     YF1 = YF0[0];
@@ -412,6 +435,7 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
 
                     cout << "IZGIBU:   YF1 = " << YF1 << "   YF2 = " << YF2 << endl;
                 } //11 continue
+
                 SFR[J][i] = SIGF0[J] * KF;
                 cout << "IZGIBU 11:    KF = " << KF << "       SFR[" << J << "][" << i << "] = " << SFR[J][i] << endl;   // 2.66
                    //       print*, ' SFR(J,I)  ', J, I, SFR(J, I)
@@ -419,29 +443,60 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
                    //      SIGF(J) - исходное pасчетное напpяжение для ступени IRS
                    // 12 continue
                 IRS[J] = ITF0[J];  //*** IRS[J] = 1 + ITF0[J];
+                cout << "IZGIBU ****:    IRS[" << J << "] = " << IRS[J] << endl;
                 SIGF[J] = SFR[J][IRS[J]];
-                cout << "IZGIBU 12:    SIGF[" << J << "] = " << SIGF[J] << endl;
+                cout << "IZGIBU 12:    SIGF[" << J << "] = " << SIGF[J] << endl;    // 218.5 вместо 229,    591.4 вместо 233
                 if (!(J == 0 && II1 == 0) && !(J == 1 && II2 == 0)) {
+                    cout << "IZGIBU bef 48:     J = " << J << "      SFR[0][IRS[0] = " << SFR[0][IRS[0]] << "      SGFG[0] = " << SGFG[0] << endl;
                     if (J == 0 && SFR[0][IRS[0]] < SGFG[0]) {  // 48 continue
                         SIGF[0] = SFR[0][IRS[0]];
                         NFE1 = NC[0][IRS[0]];
-                        cout << "IZGIBU 48:     SIGF[0] = " << SIGF[0] << "      NFE1 = " << NFE1 << endl;
                         YN1 = pow((NFLIM / NFE1), 0.025);
                         if (NFE1 < NFLIM && IQF1 == 1) YN1 = pow((NFLIM / NFE1), 0.167);
                         if (NFE1 < NFLIM && IQF1 == 2) YN1 = pow((NFLIM / NFE1), 0.111);
                         if (YN1 < 0.85) YN1 = .85;
-                        II1 = -1;
+                        II1 = -1; // т.е. расчет YN1 уже произведен и пересчет с помощью YLIFE не нужен
+                        cout << "IZGIBU 48:   SIGF[0] = " << SIGF[0] << "    NFE1 = " << NFE1 << "    YN1 = " << YN1 << "    расчет YN1 произведен и пересчет с помощью YLIFE не нужен" << endl;
                     }
                     if (J == 1 && SFR[1][IRS[1]] < SGFG[1]) {  // 49 continue
                         SIGF[1] = SFR[1][IRS[1]];
                         NFE2 = NC[1][IRS[1]];
-                        //	print*, '---m49  NFE2   ', NFE2
                         YN2 = pow((NFLIM / NFE2), 0.025);
                         if (NFE2 < NFLIM && IQF2 == 1) YN2 = pow((NFLIM / NFE2), 0.167);
                         if (NFE2 < NFLIM && IQF2 == 2) YN2 = pow((NFLIM / NFE2), 0.111);
                         if (YN2 < 0.85) YN2 = .85;
-                        II2 = -1;
+                        II2 = -1; // т.е. расчет YN2 уже произведен и пересчет с помощью YLIFE не нужен
+                        cout << "IZGIBU 49:   SIGF[1] = " << SIGF[1] << "    NFE2 = " << NFE2 << "    YN2 = " << YN2 << "    расчет YN2 произведен и пересчет с помощью YLIFE не нужен" << endl;
                     }
+                    
+                    /*
+                    if (SFR[J][i] <= SGFG[J]) {
+                        if (J == 0) II1 = 0;
+                        if (J == 1) II2 = 0;
+                        //                        GOTO 59
+                    }
+                    */
+
+                    if (SFR[J][i] >= SGFLIM[J]) ITF1[J] = i;
+                       //       print*, ' ITF1(1,2)  ', ITF1
+                       //    ITF - число ступеней, участвующих в pасчете
+                       //    на изгибную выносливость
+                        ITF[J] = i;
+                        // 20 continue
+                        NSF[J] = NSF[J] + NC[J][i];
+                        if (J == 0) {
+                            SFR1[i] = SFR[0][i];
+                            NC1[i] = NC[0][i];
+                        }
+                        if (J == 1) {
+                            SFR2[i] = SFR[1][i];
+                            NC2[i] = NC[1][i];
+                        }
+                 
+
+
+
+
                     // 55 continue
                 
                 }
@@ -453,7 +508,7 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
                     break;
                 }
 
-            }                  // 60 continue
+            }                  // 60 continue ==============================================================================
             
         }
         if ((L < -1 && SIGF[0] == 0.) && !(II1 <= 0 && II2 <= 0)) {   // 599 continue
@@ -470,20 +525,24 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
     // 600 continue
 
     //*** временно на период отладки II1 = II2 = 0
-    II1 = 0;
-    II2 = 0;
+    //II1 = 0;
+    //II2 = 0;
     //****
 
     cout << "IZGIBU:   II1 = " << II1 << "   II2 = " << II2 << endl;
-    cout << "IZGIBU:   YN1 = " << YN1 << "   YN2 = " << YN2 << endl;
-
-    if (II1 >= 0) YN1 = YLIFE(ITF[0], ITF0[0], ITF1[0], SGFLIM[0], SFR1, SIGF[0], NC1, IMF1, NFE1);
-    if (II2 >= 0) YN2 = YLIFE(ITF[1], ITF0[1], ITF1[1], SGFLIM[1], SFR2, SIGF[1], NC2, IMF2, NFE2);
-
-    cout << "IZGIBU:   YN1 = " << YN1 << "   YN2 = " << YN2 << endl;
+    cout << "IZGIBU: 1)  YN1 = " << YN1 << "   NFE1 = " << NFE1 << "   YN2 = " << YN2 << "   NFE2 = " << NFE2 << "   SFR1[0] = " << SFR1[0] << "   NC1[0] = " << NC1[0] << endl;
+//* временно закрыл
+    if (II1 >= 0) YN1 = YLIFE(ITF[0] + 1, ITF0[0], ITF1[0], SGFLIM[0], SFR1, SIGF[0], NC1, IMF1, NFE1);    
+    if (II2 >= 0) YN2 = YLIFE(ITF[1] + 1, ITF0[1], ITF1[1], SGFLIM[1], SFR2, SIGF[1], NC2, IMF2, NFE2);
+//*/
+    cout << "IZGIBU: 2)  YN1 = " << YN1 << "   YN2 = " << YN2 << endl;   // неверно 4 и 4 вместо .85593  и   .87292
+    cout << "IZGIBU:   SF1 = " << SF1 << "   SF2 = " << SF2 << endl;
     
     float SGFP1 = SFLM1 * YN1 / SF1;
     float SGFP2 = SFLM2 * YN2 / SF2;
+
+    cout << "IZGIBU:   SGFP1 = " << SGFP1 << "   SGFP2 = " << SGFP2 << endl;
+
     SFF1 = SFLM1 * YN1 / SIGF[0];
     SFF2 = SFLM2 * YN2 / SIGF[1];
 
@@ -503,13 +562,13 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
     if (ITF0[0] < IT) SIGFM1 = SIGMAX(SIGF[0], TQ[ITF0[0]], TMAX, KFV1, KFB1, KFA1, 2);
     else SIGFM1 = SIGF01 * KF1 * TMAX / TQ[0];
  
-    float SGFPM1 = SGFPM[IG1] * YX1 / (1.75 * YZ1);              //*** IG1 - 1 ?
+    float SGFPM1 = SGFPM[IG1-1] * YX1 / (1.75 * YZ1);              //*** IG1 - 1 ?
     
     if (SFPM1Z > 0.) SGFPM1 = SFPM1Z * YX1 / (1.75 * YZ1);
     if (ITF0[1] < IT) SIGFM2 = SIGMAX(SIGF[1], TQ[ITF0[1]], TMAX, KFV1, KFB1, KFA1, 2);
     else  SIGFM2 = SIGF02 * KF1 * TMAX / TQ[0];                   // 0 - ?
 
-    float SGFPM2 = SGFPM[IG2] * YX2 / (1.75 * YZ2);            //*** IG2 - 1 
+    float SGFPM2 = SGFPM[IG2-1] * YX2 / (1.75 * YZ2);            //*** IG2 - 1 
 
 
 /*
@@ -639,6 +698,8 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
     float VR = PI * D1 * RM[IRS[0]] / 6.E4;
 
     cout << "IZGIBU before PRCPI     VR =  " << VR << "     IVR = " << IVR << endl;
+    cout << "IZGIBU before PRCPI    SIGF[0] =  " << SIGF[0] << "     SIGF[1] = " << SIGF[1] << endl;
+
 
     float TQ1 = TQ[ITF0[0]];
     float TQ2 = TQ[ITF0[1]];

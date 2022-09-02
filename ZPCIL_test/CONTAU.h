@@ -62,7 +62,7 @@ extern float DA1, DA2, DB1, DB2, ALFTW;
 
 extern fstream f_1;    // файл для результата    //***
 
-void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float TQ1[100], float TC1[100], float N1[100]) {
+void CONTAU(float& TQHP, float SGN, int INW, float A0, float DTC, float KNR, int IT1, float TQ1[100], float TC1[100], float N1[100]) {
 
     float SGH = 1., NUZ = .07, NUU = .04, AGH = .75;
     float SHD[20] = { 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.1, 1.1, 1.1, 1.1, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2 };
@@ -77,6 +77,7 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
     int IRS = 0;
     double SIGH0 = 0, SIGH01 = 0, K0 = 0, K01 = 0, KHV = 0, KHV1 = 0;
     float KH = 0, KH1 = 0, V = 0, VR = 0, WHT = 0, ZN1 = 0, ZN2 = 0, NHE1 = 0, NHE2 = 0, ZV1 = 0, ZV2 = 0, ZX1 = 0, ZX2 = 0, ZR = 0;
+    float FPB1 = 0, FPB2 = 0;
 
     double PI = 3.1415926;
 
@@ -116,7 +117,7 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
 
     float SIGH = 0.;
     float ROV = .17 * DSH * UU / ((UU + SGN) * pow(cos(BE), 2));
-    float ZE = 190.;
+    float ZE = 190.; // коэф. учит. мех. св-ва сопряженных зуб. колес   ГОСТ Табл. 6 п. 1   исправлено ручкой 191.7 = 192
     float EPSG = EPSA + EPSB;
 
     cout << "CONTAU: D1, D2, DSH  = " << D1 << " , " << D2 << " , " << DSH << "     Z1 = " << Z1 << "  Z2 = " << Z2 << "  UU = " << UU << endl;
@@ -176,7 +177,7 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
     }
     cout << "CONTAU: SH1 = " << SH1 << "      SH2 = " << SH2 << "     SHG1 = " << SHG1 << "      SHG2 = " << SHG2 << endl;
 //	ДЛЯ ЭЗТМ  ПРИНЯТО IVR = 0
-    float DLTHR = DLTH(IH, BE, IMD);
+    float DLTHR = DLTH(IH, BE, IMD);  // 0.004 вместо 0.002
     cout << "CONTAU: IH, BE, IMD, DLTHR = " << IH << "   " << BE << "   " << IMD << "   " << DLTHR << endl;
     
     SGHG[0] = AGH * SGHLIM[0];
@@ -207,13 +208,15 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
                 cout << "CONTAU:    L = " << L << "    NC1[i] = " << NC1[i] << "     NC2[i] = " << NC2[i] << endl;
             }
 
-            double FTH = 2000. * TQ[i] / D1;
+            double FTH = 2000. * TQ[i] / D1;  // Окружная сила на делительном цилиндре в торцовом сечении
+            cout << "CONTAU:  Окружная сила на делительном цилиндре в торцовом сечении FTH = 2000. * TQ[i] / D1 = 2000 * " << TQ[i] << " / " << D1 << " = " << FTH << endl;
 
             K0 = FTH * (UU + SGN) / (BW * DSH * UU);
-            cout << "CONTAU:    K0 = " << K0 << "   FTH = " << FTH << "   UU = " << UU << "   SGN = " << SGN << "   BW = " << BW << "   DSH = " << DSH << endl;
+            cout << "CONTAU:    K0 = " << K0 << "   UU = " << UU << "   SGN = " << SGN << "   BW = " << BW << "   DSH = " << DSH << endl;
 
             if (IVP == 5) K0 = FTH * sqrt(pow(UU, 2) + 1.) / (BW * DSH * UU);
             SIGH0 = ZE * ZH * ZEPS * sqrt(K0);
+            // ZEPS - коэф учета суммарной длины контактных линий
 
             cout << "CONTAU:    SIGH0 = " << SIGH0 << "   ZE = " << ZE << "   ZH = " << ZH << "   ZEPS = " << ZEPS << "   sqtr(" << K0 << ") = " << sqrt(K0) << endl;
 
@@ -226,14 +229,14 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
             double khv = FTH / BW;
             if (khv < 150) khv = 150;
             KHV = 1. + WVR / khv;
-            cout << "CONTAU:    V = " << V << "    WVR = " << WVR << "    khv = " << khv << "    KHV = " << KHV << endl;
+            cout << "CONTAU:    V = " << V << "    WVR = " << WVR << "    khv = " << khv << "    KHV = " << KHV << endl;  // WVR = 20 вместо 7.84
 
             cout << "CONTAU:    IKG = " << IKG << endl;
             if (IKG != 0) {                  // признак расположения зубчатых колес
                 if (IKG >= 1 && IKG <= 7) {
-                    double KHB = AKHBT(IKG, PSIBD, IH);
+                    KHB = AKHBT(IKG, PSIBD, IH);
                     KHB = (KHB - 1.) * pow((IST3 / 8.), 2) + 1.;
-                    cout << "CONTAU:    KHB = " << KHB << endl;
+                    cout << "CONTAU:    KHB = " << KHB << endl;   // 1.0627
                 }
                 if (IKG >= 8 && IKG <= 9) {
                     OMEG = 0.;
@@ -244,7 +247,7 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
 
                     if (SGN < 0 && BE != 0.) KHB = 1.3;
                 }
-
+                cout << "CONTAU:             KHB = " << KHB << endl;   // 
                 if (KHB < 1) KHB = 1;
 
                 cout << "CONTAU:    BE = " << BE << endl;
@@ -253,11 +256,11 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
                     float AAL = .3;
                     if (IH == 1) AAL = .2;
 
-                    cout << "CONTAU:    EPSB = " << EPSB << "    ZEPS = " << ZEPS << endl;
+                    cout << "CONTAU:    EPSB = " << EPSB << "    ZEPS = " << ZEPS << "          X[1] = " << X[1] << endl;
 
                     cout << "CONTAU:    before AKHA    EPSA, EPSG, MN, D1, D2, BW, FTH, KHV, KHB, AAL = " << EPSA << "  " << EPSG << "  " << MN << "  " << D1 << "  " << D2 << "  " << BW << "  " << FTH << "  " << KHV << "  " << KHB << "  " << AAL << endl;
-                    KHA = AKHA(EPSA, EPSG, MN, D1, D2, BW, FTH, KHV, KHB, AAL);
-                    cout << "CONTAU:    after AKHA    KHA = " << KHA << endl;
+                    KHA = AKHA(EPSA, EPSG, MN, D1, D2, BW, FTH, KHV, KHB, AAL, FPB1, FPB2);
+                    cout << "CONTAU:    after AKHA    KHA = " << KHA << "    KHB = " << KHB <<endl;
 
                     if (EPSB >= EPSA) KHAMAX = EPSA * EPSA * .95 / EPSB;
                     if (EPSB < EPSA) KHAMAX = EPSA * .95;
@@ -291,7 +294,8 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
                 // WRITE(7, 7018) EPSB, ZEPS
                 //  7018  FORMAT(' CONTau 7018 before AKHA: EPSB,ZEPS ', 5X, 2F9.3)
 
-//***                  KHA = AKHA(ZVE1, ZVE2, X1, X2, EPSA, EPSG, MN, D1, D2, BW, FTH, KHV, KHB, IST2, AAL, FPB1, FPB2);
+//***                  KHA = AKHA(ZVE1, ZVE2, X1, X2, EPSA, EPSG, MN, D1, D2, BW, FTH, KHV, KHB, IST2, AAL, FPB1, FPB2);                  
+                // KHA = AKHA(EPSA, EPSG, MN, D1, D2, BW, FTH, KHV, KHB, IST2, AAL, FPB1, FPB2);
 
                       //  WRITE(7, 7019) KHA
                       //  7019  FORMAT(' CONTau 7019 after AKHA: KHA ', 5X, F9.3)
@@ -306,12 +310,12 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
 
             // ---------- 8 ------------
 
-            KH = KA * KHV * KHB * KHA;
-            cout << "CONTAU: KH = " << KH << "   SIGH0 = " << SIGH0 << endl;
+            KH = KA * KHV * KHB * KHA;  // коэф. нагрузки  
+            cout << "CONTAU: коэф. нагрузки KH = KA * KHV * KHB * KHA = " << KA << " * " << KHV << " * " << KHB << " * " << KHA << " = " << KH << "      SIGH0 = " << SIGH0 << endl;
 
             //        pасчетное напpяжение на i - той ступени
 
-            SHR[i] = SIGH0 * sqrt(KH);
+            SHR[i] = SIGH0 * sqrt(KH);  // контактное напряжение в полюсе зацепления - ГОСТ 21354-87 -стр.1
             cout << "CONTAU: SHR[" << i << "] = " << SIGH0 * sqrt(KH) << endl;
 
             //      пpовеpка : IJ = 0 - исходное pасчетное напряжение еще не выбрано
@@ -355,7 +359,7 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
                 IRS = 1 + ITH0;
                 cout << "CONTAU: ===   IRS = " << IRS << "   ITH0 = " << ITH0 << "    SHR[IRS] = " << SHR[IRS] << endl;
                 cout << "CONTAU:    NC1[0] = " << NC1[0] << "   NHLIM[0] = " << NHLIM[0] << "    NC2[0] = " << NC2[0] << "   NHLIM[1] = " << NHLIM[1] << endl;
-                SIGH = SHR[IRS - 1];
+                SIGH = SHR[IRS - 1];   // SIGH - контактное напряжение в полюсе зацепления
                 cout << "CONTAU: 9     SIGH = " << SIGH << endl;
                 IJ = 1;
                 SIGH01 = SIGH0;
@@ -364,12 +368,12 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
                 OMEG1 = OMEG;
                 KHB1 = KHB;
                 KHA1 = KHA;
-                //                  if (IPR >= 6 && BE != 0.) f_1 << "\n    ПРЕДЕЛЬН.ОТКЛОНЕНИЕ ШАГА ЗАЦЕПЛ.мкм FPB" << FPB1 << "   " << FPB2;
+                if (IPR >= 6 && BE != 0.) f_1 << "\nПРЕДЕЛЬН.ОТКЛОНЕНИЕ ШАГА ЗАЦЕПЛ.мкм FPB  " << setprecision(3) << fixed << setw(10) << FPB1 << setw(10) << FPB2;
                 VR = V;
                 KH1 = KH;
                 WHT = FTH * KH / BW;
             }
-
+/*
             // ---------- 10 ------------   выбоp исходного pасчетного напpяжения исходное pасчетное напpяжение меньше повpеждаемого ?
 
             for (int J = 0; J < 2; J++) {
@@ -380,13 +384,17 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
 
                         if (J == 0 && SIGH < SGHG[0]) { //======  48  =======
                             SHR1[i] = SHR[i];
-                            NHE1 = NC1[IRS - 1];                             
+                            NHE1 = NC1[IRS - 1];
                             ZN1 = pow((NHLIM[0] / NHE1), 0.05);
                             if (NHE1 < NHLIM[0]) ZN1 = pow((NHLIM[0] / NHE1), 0.167);
                             ITH[0] = 1 + ITH0;
                             II1 = 0;
                             cout << "CONTAU: 48     NHE1 = " << NHE1 << "    ZN1 = " << ZN1 << "    ITH[0] = " << ITH[0] << endl;
                         }
+
+
+
+
                         else {
                             if (J == 1 && SIGH < SGHG[1]) {  //======  49  =======
                                 SHR2[i] = SHR[i];
@@ -403,13 +411,13 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
                          //       if (!(J == 0 && SHR[i] < SGHG[0]) && !(J == 1 && SHR[i] < SGHG[1])) { //  пpовеpка: I - ое pасчетное напpяжение меньше пpедела усталости ?
                                     if (SHR[i] >= SGHLIM[J]) ITH1[J] = i;
                                     //       ITH1 - число ступеней на первом участке,  ITH - число ступеней,  (участвующих в pасчете на контактную выносливость
-                                    ITH[J] = i;
+                                    ITH[J] = i + 1; // *** + 1
                                     SHR1[i] = SHR[i];
                                     SHR2[i] = SHR[i];
-                                }                                    
+                                }
                             }
                         }
-                        
+
                         //======  55  =======        вариант, когда исходное pасчетное напpяжение меньше повpеждаемого
 
                         cout << "CONTAU: 55     IPR = " << IPR << "     J = " << J << endl;
@@ -425,38 +433,180 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
                             f_1 << "   " << i << "    " << SIGH0 << "   " << KHV << "     " << KHB << "    " << KHA << "  " << KH << "  " << SHR1[i] << "  " << NC1[i] << endl;
                         }
 
-                        /*
+                    }
+                }
+
+                // ---------- 58 ------------
+               // 58 IF(II1.EQ.0.AND.II2.EQ.0) GOTO 61
+
+            }   // m59
+            cout << "CONTAU: 59     NHE2 = " << NHE2 << endl;
+
+*/
+            // ---------- 10 ------------   выбоp исходного pасчетного напpяжения исходное pасчетное напpяжение меньше повpеждаемого ?
+
+            for (int J = 0; J < 2; J++) {
+
+                cout << "CONTAU: ========     J = " << J << "    II1 = " << II1 << "    II2 = " << II2 << endl;
+                if ((J == 0 && II1 == 1) || (J == 1 && II2 == 1)) {          //  II1, II2 - флаги                    
+                    cout << "CONTAU: ===========     SIGH = " << SIGH << "    SGHG[J] = " << SGHG[J] << "    SGHG[J] = " << SGHG[J] << endl;
+                        if (J == 0 && SIGH < SGHG[0]) { //======  48  =======
+                            SHR1[i] = SHR[i];
+                            NHE1 = NC1[IRS - 1];                             
+                            ZN1 = pow((NHLIM[0] / NHE1), 0.05);
+                            if (NHE1 < NHLIM[0]) ZN1 = pow((NHLIM[0] / NHE1), 0.167);
+                            ITH[0] = 1 + ITH0;
+                            II1 = 0;
+                            cout << "CONTAU: 48     NHE1 = " << NHE1 << "    ZN1 = " << ZN1 << "    ITH[0] = " << ITH[0] << endl;
+                        } //*** GO TO 55
+                        
+                        if (J == 1 && SIGH < SGHG[1]) {  //======  49  =======
+                            SHR2[i] = SHR[i];
+                            NHE2 = NC2[IRS - 1];
+                            ZN2 = pow((NHLIM[1] / NHE2), 0.05);
+                            if (NHE2 < NHLIM[1]) ZN2 = pow((NHLIM[1] / NHE2), 0.167);
+                            ITH[1] = 1 + ITH0;
+                            II2 = 0;
+                            cout << "CONTAU: 49     NHE2 = " << NHE2 << "    ZN2 = " << ZN2 << "    ITH[1] = " << ITH[1] << endl;
+                        } //*** GO TO 55
+                        
+                        if (!(J == 0 && SHR1[i] < SGHG[0]) && !(J == 1 && SHR1[i] < SGHG[1])) {
+                            if (SHR[i] >= SGHLIM[J]) ITH1[J] = i;
+                                //       ITH1 - число ступеней на первом участке
+                                //       ITH - число ступеней, участвующих в pасчете
+                                //             на контактную выносливость
+
+                            ITH[J] = i + 1; // *** + 1
+                            SHR1[i] = SHR[i];
+                            SHR2[i] = SHR[i];
+                        }  
+                        //======  55  =======        вариант, когда исходное pасчетное напpяжение меньше повpеждаемого
+
+                        cout << "CONTAU: 55     IPR = " << IPR << "     J = " << J << endl;
+                        if (IPR == 8 && J == 0) {
+                            f_1 << "\n ШЕСТЕРНЯ";
+                            f_1 << "\n   I    SIGH0       KHV      KHB       KHA     KH     SHR     NC \n";
+                            f_1 << "   " << i << "    " << SIGH0 << "   " << KHV << "     " << KHB << "    " << KHA << "  " << KH << "  " << SHR1[i] << "  " << NC1[i] << endl;
+                            ITH[J] = i;
+                        }
+                        if (IPR == 8 && J == 1) {
+                            f_1 << "\n КОЛЕСО";
+                            f_1 << "\n   I    SIGH0       KHV      KHB       KHA     KH     SHR     NC \n";
+                            f_1 << "   " << i << "    " << SIGH0 << "   " << KHV << "     " << KHB << "    " << KHA << "  " << KH << "  " << SHR1[i] << "  " << NC1[i] << endl;
+                        }                  
+                }
+                
+                // ---------- 58 ------------                
+                if (II1 != 0 || II2 != 0) {
+                    //    59 CONTINUE
+                    cout << "CONTAU: 59     NHE2 = " << NHE2 << endl;
+                    if (L < -1 && SIGH == 0) ITH0 = ITH0 + 1;
+                }
+
+            }   
+            
+
+             /*
+            for (int J = 0; J < 2; J++) {
+                if (J == 0) {
+                    if (II1 == 1 && SHR[i] < SGHG[0]) continue;
+                    if (SHR[i] >= SGHLIM[J]) ITH1[J] = i;
+                    //       ITH1 - число ступеней на первом участке
+                    //       ITH - число ступеней, участвующих в pасчете
+                    //             на контактную выносливость
+                    ITH[J] = i;
+                    SHR1[i] = SHR[i];
+                    SHR2[i] = SHR[i];
+                }
+                else {
+                    SHR1[i] = SHR[i];
+                    NHE1 = NC1[IRS];
+                    ZN1 = pow((NHLIM[0] / NHE1), 0.5);
+                    if (NHE1 < NHLIM[0]) ZN1 = pow((NHLIM[0] / NHE1), 0.167);
+                    ITH[0] = 1 + ITH0;
+                    II1 = 0;
+                }
+
+
+                }
+                if (J == 1) {
+                    if (II2 == 1 && SHR[i] < SGHG[1]) continue;
+                }
+            
+            }
+                       
                 
 
 
-                    IF(J.EQ.1.AND.SHR(I).LT.SGHG(1)) GOTO 59
-                    IF(J.EQ.2.AND.SHR(I).LT.SGHG(2)) GOTO 61
-                    C       пpовеpка : I - ое pасчетное напpяжение
-                    C       меньше пpедела усталости ?
+                      10       DO 59 J=1,2
+C       пpовеpка: исходное pасчетное напpяжение
+C       меньше повpеждаемого ?
+
+      IF(J.EQ.1.AND.II1.EQ.0) GOTO 58
+      IF(J.EQ.2.AND.II2.EQ.0) GOTO 58
+      IF(J.EQ.1.AND.SIGH.LT.SGHG(1)) GOTO 48
+      IF(J.EQ.2.AND.SIGH.LT.SGHG(2)) GOTO 49
+C      пpовеpка: i -ое pасчетное напpяжение
+C      меньше повpеждаемого ?
+
+      IF(J.EQ.1.AND.SHR(I).LT.SGHG(1)) GOTO 59
+      IF(J.EQ.2.AND.SHR(I).LT.SGHG(2)) GOTO 61
+C       пpовеpка: I-ое pасчетное напpяжение
+C       меньше пpедела усталости ?
+
+      IF(SHR(I).GE.SGHLIM(J)) ITH1(J)=I
+C       ITH1 - число ступеней на первом участке
+C       ITH - число ступеней, участвующих в pасчете
+C             на контактную выносливость
+C       ITH1 - ўшёыю ёЄєяхэхщ эр яхЁтюь єўрёЄъх
+
+      ITH(J)=I
+      SHR1(I)=SHR(I)
+      SHR2(I)=SHR(I)
+      GOTO 55
+C       вариант, когда исходное pасчетное напpяжение
+C       меньше повpеждаемого
+
+   48 SHR1(I)=SHR(I)
+      NHE1=NC1(IRS)
+       WRITE(7,7033) NHE1,IRS
+ 7033  FORMAT(' CONT  NHE1,IRS ',F10.3,I5)
+      ZN1=(NHLIM(1)/NHE1)**.05
+      IF(NHE1.LT.NHLIM(1)) ZN1=(NHLIM(1)/NHE1)**.167
+      ITH(1)=1+ITH0
+      II1=0
+      GOTO 55
+   49 SHR2(I)=SHR(I)
+      NHE2=NC2(IRS)
+      ZN2=(NHLIM(2)/NHE2)**.05
+      IF(NHE2.LT.NHLIM(2)) ZN2=(NHLIM(2)/NHE2)**.167
+      ITH(2)=1+ITH0
+      II2=0
+   55 IF((IPR.EQ.8).AND.J.EQ.1) WRITE(1,102)
+     * I,SIGH0,KHV,KHB,KHA,KH,SHR1(I),NC1(I)
+      ITH(J)=I
+  102 FORMAT(/' ШЕСТЕРНЯ'/
+     * '  I  SIGH0       KHV       KHB      KHA',
+     * '      KH     SHR     NC'/I3,6F9.2,F10.3/)
+      IF((IPR.EQ.8).AND.J.EQ.2) WRITE(1,103)
+     * I,SIGH0,KHV,KHB,KHA,KH,SHR2(I),NC2(I)
+  103 FORMAT(/' КОЛЕСО'/
+     * '  I  SIGH0       KHV       KHB      KHA',
+     * '      KH     SHR     NC'/I3,6F9.2,F10.3/)
+   58 IF (II1.EQ.0.AND.II2.EQ.0) GOTO 61
+   59 CONTINUE
 
 
-                    IF(SHR(I).GE.SGHLIM(J)) ITH1(J) = I
-                    C       ITH1 - число ступеней на первом участке
-                    C       ITH - число ступеней, участвующих в pасчете
-                    C             на контактную выносливость
-
-
-                    ITH(J) = I
-                    SHR1(I) = SHR(I)
-                    SHR2(I) = SHR(I)
-                    GOTO 55
-                    C       вариант, когда исходное pасчетное напpяжение
-                    C       меньше повpеждаемого
-                    */
+  601 	IF(L.LT.-1.AND.SIGH.EQ.0) ITH0=ITH0+1
+   60 CONTINUE
+  333 FORMAT(
+     *' ОКРУЖНАЯ СКОРОСТЬ ',
+     *' НА РАСЧЕТН.СТУПЕНИ ЦИКЛОГРАММЫ, м/с   V',F13.3)
+     * 
+  61 continue 
+  */
                     
-    
-                    }
-                }
-            
-            // ---------- 58 ------------   
-           // 58 IF(II1.EQ.0.AND.II2.EQ.0) GOTO 61
-
-        }   // m59:   
+   
 
         }
             
@@ -484,18 +634,28 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
     ZV1 = ZV(VR, HB1);
     ZV2 = ZV(VR, HB2);
 
+    // Коэффициенты долговечности
     if (II1 != 0) {
+        cout << "CONTAU:  --+-- II1 = " << II1 << endl;
+        cout << "CONTAU:  --+-- ITH[0] = " << ITH[0] << "     ITH0 = " << ITH0 << "     ITH1[0] = " << ITH1[0] << "     SGHLIM[0] = " << SGHLIM[0] << endl;
+        cout << "CONTAU:  --+-- SHR1[0] = " << SHR1[0] << "     SIGH = " << SIGH << "     NHLIM[0] = " << NHLIM[0] << "   NC1[0] = " << NC1[0] << "   HB1 = " << HB1 << "   NHE1 = " << NHE1 << endl;
         ZN1 = ZLIFE(ITH[0], ITH0, ITH1[0], SGHLIM[0], SHR1, SIGH, NHLIM[0], NC1, HB1, NHE1);
+        cout << "CONTAU:  ==+== ZN1 = " << ZN1 << endl;
         if (ZN1 < 0.75) ZN1 = 0.75;
         if (ZN1 > ZNM1) ZN1 = ZNM1;
     }
     if (II2 != 0) {
-        ZN2 = ZLIFE(ITH[1], ITH0, ITH1[1], SGHLIM[1], SHR1, SIGH, NHLIM[1], NC1, HB1, NHE1);
+        ZN2 = ZLIFE(ITH[1], ITH0, ITH1[1], SGHLIM[1], SHR2, SIGH, NHLIM[1], NC2, HB2, NHE2);
+        cout << "CONTAU:  --+-- II2 != 0      ITH[1] = " << ITH[1] << "     ZN2 = " << ZN2 << endl;
         if (ZN2 < 0.75) ZN2 = 0.75;
         if (ZN2 > ZNM2) ZN2 = ZNM2;
     }
     SGHP1 = SGHLIM[0] * ZN1 * ZR * ZV1 * ZX1 / SH1;
     SGHP2 = SGHLIM[1] * ZN2 * ZR * ZV2 * ZX2 / SH2;
+
+    cout << "CONTAU:  ---    SGHLIM[0] = " << SGHLIM[0] << "  ZN1 = " << ZN1 << "     ZV1 = " << ZV1 << "  ZX1 = " << ZX1 << "  ZR = " << ZR << endl;
+    cout << "CONTAU:  ---    SGHLIM[1] = " << SGHLIM[1] << "  ZN2 = " << ZN2 << "     ZV2 = " << ZV2 << "  ZX2 = " << ZX2 << endl;
+    cout << "CONTAU:  ---    SH1 = " << SH1 << "  SH2 = " << SH2 << "     SGHP1 = " << SGHP1 << "  SGHP2 = " << SGHP2 << endl;
 
     float AU = min(SGHP1, SGHP2);
     SGHP = AU;
@@ -508,10 +668,17 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
         //   интегpальный метод pасчета допускаемого контактного
         //   напpяжения для косозубой зубчатой пеpедачи
 
-        float AA1 = cos(DB1 / DA1);
-        float AA2 = cos(DB2 / DA2);
+        cout << "CONTAU: ===    DB1 = " << DB1 << "  DA1 = " << DA1 << "    DB2 = " << DB2 << "      DA2 = " << DA2 << endl;
+        float AA1 = acos(DB1 / DA1);
+        float AA2 = acos(DB2 / DA2);
         float ALFT = ALFTW;
+
+        cout << "CONTAU: === before SGHPBE   SGHP1 = " << SGHP1 << "  SGHP2 = " << SGHP2 << "    AA1 = " << AA1 << "     AA2 = " << AA2 << "      ALFT = " << ALFT << endl;
+        cout << "CONTAU: === before SGHPBE      Z1 = " << Z1 << "        Z2 = " << Z2 << "     HB1 = " << HB1 << "     HB2 = " << HB2 << "        VR = " << VR << endl << endl;
+
         SGHP = SGHPBE(SGHP1, SGHP2, AA1, AA2, ALFT, Z1, Z2, HB1, HB2, VR);
+
+
         SHF1 = SGHP * SH1 / SIGH;
         SHF2 = SGHP * SH2 / SIGH;
     }
@@ -526,7 +693,7 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
     if (SHPM2 == 0.) SGHPM2 = SGHPM(IG2, HB2, HRC2, HV2);
     SHMF1 = SGHPM1 / SIGHM;
     SHMF2 = SGHPM2 / SIGHM;
-    cout << "CONTAU:  ---    SHMF1 = " << SHMF1 << "    SHMF2 = " << SHMF2 << endl;
+    cout << "CONTAU:  ---    II1 = " << II1 << "  II2 = " << II2 << "    SGHP = " << SGHP << "     SHMF1 = " << SHMF1 << "    SHMF2 = " << SHMF2 << endl;
 
        //     Расчет эапаса долговечности
        //       по методике СЕРЕНСЕНА - КОЗЛОВА - РАСУЛОВА - ГОЛЛЕРА
@@ -597,6 +764,7 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
 
     cout << "CONTAU === 622 ===:      SHF1 = " << SHF1  << "    XP1 = " << XP1  << "    PH1 = " << PH1  << "    SHF2 = " << SHF2  << "   XP2 = " << XP2  << "   PH2 = " << PH2 << endl;
     cout << "CONTAU === 6220 ==:     SHMF1 = " << SHMF1 << "   XPM1 = " << XPM1 << "   PHM1 = " << PHM1 << "   SHMF2 = " << SHMF2 << "  XPM2 = " << XPM2 << "  PHM2 = " << PHM2 << endl;
+    cout << "CONTAU before SGMHKA:     SIGH = " << SIGH << endl;
     //   pасчет на предотвpащение длительного контактного
     //   pазpушения для азотиpованных зубчатых колес
     //          пpиложение 8  ГОСТ
@@ -618,7 +786,7 @@ void CONTAU(float SGN, int INW, float A0, float DTC, float KNR, int IT1, float T
 
 //       допускаемая нагpузка
 
-    float TQHP = TQH * pow((SGHP / SIGH), 2);
+    TQHP = TQH * pow((SGHP / SIGH), 2);
             /*
             C                                                    C
 C  печать pезультатов pасчета на конт.пpочность      C
@@ -630,10 +798,10 @@ C                                                    C
 C===================
 
     */
-    cout << "CONTAU: 61     ZN1 = " << ZN1 << "    ZR = " << ZR << "    ZV1 = " << ZV1 << "    ZX1 = " << ZX1 << endl;
+    cout << "CONTAU: 61     ZN1 = " << ZN1 << "    ZR = " << ZR << "    ZV1 = " << ZV1 << "    ZX1 = " << ZX1 << "   TQHP = " << TQHP << endl;
     cout << "CONTAU: 61     ZN1 = " << ZN1 << "    NHE1 = " << NHE1 << "    II1 = " << II1 << endl;
   
-    cout << "CONTAU before PRCPC:    SIGH = " << SIGH << " AU = " << AU << " SHGP = " << SGHP << " SHGP1 = " << SGHP1 << " SHGP2 = " << SGHP2 << endl;
+    cout << "CONTAU before PRCPC:    SIGH = " << SIGH << " AU = " << AU << " SHGP = " << SGHP << " SHGP1 = " << SGHP1 << " SHGP2 = " << SGHP2 << "    NHE2 = " << NHE2 << endl;
     if (IVR <= 2) PRCPC(PH1, PH2, PHM1, PHM2,
         SIGH, SGHP1, SGHP2, SGHP, SHF1, SHF2, SHMF1, SHMF2,
         SIGHM, SGHPM1, SGHPM2,

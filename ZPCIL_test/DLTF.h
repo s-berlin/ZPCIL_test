@@ -3,7 +3,8 @@
 
 using namespace std;
 
-float DLTF(int IH, float BET, float MD) {
+float DLTF(int MD, float BET) {
+    // *** в ГОСТе коэффициенты в 10 раз больше!
     //     MD = 0 - нет модификации
     float dltf = 0.006;
     if (BET == 0) {

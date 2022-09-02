@@ -59,6 +59,7 @@ void SGMHKA(float SIGH, float SHR[100], int ITH, float NC[100], float ROV, float
     float SGMHPK = 1.07 * HKV * AF * MUT * ZLK;
        //    SGHKPU - СЯКНБМНЕ ЦКСАХМ.ЙНМРЮЙРМНЕ МЮОpЪФЕМХЕ
     float SGHKPU = SGMHPK / 1.4;
+    cout << "SGMHKA     SGHKPU = " << SGHKPU << "    SIGH = " << SIGH << "    II = " << II << endl;
     if (SGHKPU < SIGH && II == 1) {
         f_1 << "\n\n          цксахммюъ йнмрюйрмюъ бшмнякхбнярэ ьеярепмх ме цюпюмрхпнбюмю\n";
         f_1 << "\n            сякнбмне дносяй. цксахммне мюопъфемхе, лОЮ   SGHKPU " << SGHKPU;

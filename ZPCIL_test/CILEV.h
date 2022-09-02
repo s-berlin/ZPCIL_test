@@ -8,6 +8,7 @@
 #include "GEOM.h"
 #include "CONTAU.h"
 #include "IZGIBU.h"
+#include "RUZC.h"
 
 using namespace std;
 
@@ -22,7 +23,7 @@ extern fstream f_1;    // файл для результата    //***
 
 //========== Переменные по ступени
 extern int IVP;                             // тип ступени
-extern float Z1, Z2;                        // числа зубьев шестерни и колеса
+extern float Z1, Z2, U;                        // числа зубьев шестерни и колеса
 extern float MN, BE, X1, X2, X[2];          // модуль, угол наклона, коэффициенты смещения
 extern int flaw;
 extern float AW, B1, B2, D1, D2;            // межосевое расстояние ширины шестерни и колеса
@@ -43,7 +44,7 @@ extern int IQ, IP, IZ1, IG;                 // тип приложения момента, тип подши
 extern float EPSA, EPSB, ZH, ZEPS;
 extern float DA1, DA2, DB1, DB2, ALFTW;
 
-void CILEV(int IT1, float TQ1[100], float TC1[100], float RM1[100])
+void CILEV(int IS, int IT1, float TQ1[100], float TC1[100], float RM1[100])
 {
     float BBWW[2] = {0,0}, BW = 0;
     float SGN = 0;
@@ -57,32 +58,36 @@ void CILEV(int IT1, float TQ1[100], float TC1[100], float RM1[100])
     BW = B1;
     if (B2 < BW) BW = B2;
 
-    int IAX = 1;
-    if (X1 >= -5. && X2 >= -5.) IAX = 0;     //    !Aw = 0 - ­не задано
-    if (X1 <= -5. && X2 <= -5.) IAX = 3;     //    !Aw > 0 - задано
-    if (AW > 0. && X2 > -5.)  IAX = 2;
+    int IAX = 1;                           //   Заданы Aw > 0 и X1 ???
+    if (X1 > -5. && X2 > -5.) IAX = 0;     //   Заданы оба коэф. смещения, Aw = 0 - ­не задано
+    if (X1 <= -5. && X2 <= -5.) IAX = 3;   //   Не заданы оба коэф. смещения, Aw > 0 - задано
+    if (AW > 0. && X2 > -5.)  IAX = 2;     //   Заданы Aw > 0 и X2 
     
     int NW = 0;  // число сателлитов
 
 
     GEOM(NW);
-    cout << "CILEV: after GEOM:    ZH = " << ZH << "   ZEPS = " << ZEPS << "   D1 = " << D1 << "   D2 = " << D2 << endl;
+    cout << "CILEV: after GEOM:    ZH = " << ZH << "   ZEPS = " << ZEPS << "   D1 = " << D1 << "   D2 = " << D2 << "    X[1] = " << X[1] << endl;
 
     //    if (IAX == 4)  GOTO 96
   m42:
     if (L != 0) {
-  m85:
+        
         SGN = 1;
         A0 = 0;
-    }
+    
  //   for (int i = 0; i < IT1; i++) TQ1[i] = TQ1[i] * KSP;
     for (int i = 0; i < IT; i++) TQ[i] = TQ[i] * KSP;
     TMAX = TMAX * KSP;
+
     float DTC = 0.;
     float KNR = 1.;
+    float TQHP = 0;
 
  //==== вызов подпpогpаммы пpочностного pасчета активных повеpхностей зубьев по контакту ===============
-    CONTAU(SGN, NW, A0, DTC, KNR, IT1, TQ1, TC1, RM1);
+    cout << "CILEV: before CONTAU:    ZH = " << ZH << "   ZEPS = " << ZEPS << "   D1 = " << D1 << "   D2 = " << D2 << "    TQ[0] = " << TQ[0] << "    X[1] = " << X[1] << endl;
+    CONTAU(TQHP, SGN, NW, A0, DTC, KNR, IT1, TQ1, TC1, RM1);
+    cout << "CILEV: after CONTAU:       TQHP = " << TQHP << endl;
     /*
      if (IVR == 3) {  // расчет для дифференциала
      
@@ -104,7 +109,7 @@ void CILEV(int IT1, float TQ1[100], float TC1[100], float RM1[100])
     float ALTW = 0;
     float TN = 0, TNZ = 0;
     float SFLB1Z = 0, SFLB2Z = 0, SFPM1Z = 0, SFPM2Z = 0;
-    float TQF = 0, TQFP = 0, TQEV = 0, RMP = 0, EV = 0, EP = 0;
+    float TQH = 0, TQF = 0, TQFP = 0, TQEV = 0, RMP = 0, EV = 0, EP = 0;
     float PF10 = 0, PF20 = 0, SFMF1 = 0, SFMF2 = 0, SFN10 = 0, SFN20 = 0, SFG1 = 0, SFG2 = 0, SFF10 = 0,  SFF20 = 0;
 
     IZGIBU(SGN, 0, DTC, A0, KNR, P,
@@ -114,7 +119,50 @@ void CILEV(int IT1, float TQ1[100], float TC1[100], float RM1[100])
         SFLB1, SFLB2, SFPM1, SFPM2,
         TQF, TQFP, TQEV, RMP, EV, EP,
         PF10, PF20, SFMF1, SFMF2, SFN10, SFN20, SFG1, SFG2, SFF10, SFF20);
+
+    cout << "CILEV: after IZGIBU:    SFN10 = " << SFN10 << "   SFN20 = " << SFN20 << endl;
+    cout << "CILEV: before RUZC:     WH = " << WH << "   TQ(1) = " << TQ[0] << "   TQEV = " << TQEV << "   TQHP = " << TQHP << endl;
+ 
+    //      pасчет усилий в зацеплении
+    //??? не нашел подпрограммы NAGRSEC(TQ[0], 1, IVP, AL, D1, BE, 1, 0., 0.);
+    if (IPR >= 3) RUZC(TQ[0], TQH, TQHP, TQF, TQFP, AW, ALFTW, BE, KPD, IE, RMP, TQEV, EV, EP, PR);
+
+    //     ПЕРЕСЧЕТ НА СЛЕДУЮЩУЮ СТУПЕНЬ РЕДУКТОРА
+
+    cout << "  IS = " << IS << "  ISR = " << ISR << "  U = " << U << "  KPD = " << KPD << "   IT = " << IT << "  IT1 = " << IT1 << endl;
     
+    if (IS != ISR) {  
+        float PRS = U * KPD;
+        for (int i = 0; i < IT; i++) {
+            RM[i] = RM[i] / U;
+            TQ[i] = TQ[i] * PRS;
+        }
+        for (int i = 0; i < IT1; i++) {
+            RM1[i] = RM1[i] / U;
+            TQ1[i] = TQ1[i] * PRS;
+        }
+        TMAX = TMAX * PRS;
+        if (N1R > 1) N1R = N1R / U;
+        if (L < -1.) WH = WH / U;
+    }
+    
+    /*
+    96	IF(IS.NE.ISR) THEN
+        C      ПЕРЕСЧЕТ НА СЛЕДУЮЩУЮ СТУПЕНЬ РЕДУКТОРА
+        PRS = U * KPD
+        DO 97 I = 1, IT
+        RM(I) = RM(I) / U
+        97     TQ(I) = TQ(I) * PRS
+        DO 98 I = 1, IT1
+        RM1(I) = RM1(I) / U
+        98     TQ1(I) = TQ1(I) * PRS
+        TMAX = TMAX * PRS
+        IF(N1R.GT.1) N1R = N1R / U
+        IF(L.LT. - 1.) WH = WH / U
+        END IF
+        99  CONTINUE
+*/
+    }
 };
 /*
 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
@@ -287,8 +335,7 @@ SUBROUTINE CILEV(JJ, IR, IVP, IS, ISR, L, WH, TMAX,
             *SHN10, SHN20, SHF10, SHF20, SHR1, SHR2)
     END IF // ==============================================================
     
-    C---- - ўл§®ў Ї®¤Їp®Јp ¬¬л Їp®з­®бв­®Ј® p бзҐв 
-    C---- - §гЎмҐў ЇpЁ Ё§ЈЁЎҐ
+    
     C---- - вызов подпpогpаммы пpочностного pасчета
     C---- - зубьев пpи изгибе
 
@@ -381,13 +428,13 @@ SUBROUTINE CILEV(JJ, IR, IVP, IS, ISR, L, WH, TMAX,
     C
     WRITE(7, 706) WH, TQ(1), TQEV
     706  FORMAT(' CILEV bef ruzc: WH,TQ(1),TQEV: ', 3F9.3)
-    C      p бзҐв гбЁ«Ё© ў § жҐЇ«Ґ­ЁЁ
+    C      pасчет усилий в зацеплении
     CALL  NAGRSEC(TQ(1), 1, IVP, AL, D1, BE, 1, 0., 0.)
     IF(IPR.GE.3) CALL RUZC(L, TQ(1), TQH, TQHP, TQF, TQFP, U,
         *AW, ALTW, BE, KPD, IE, RMP, TQEV, EV, EP, PR)
 
     96	IF(IS.NE.ISR) THEN
-    C      Џ…ђ…‘—…’ ЌЂ ‘‹…„“ћ™“ћ ‘’“Џ…Ќњ ђ…„“Љ’ЋђЂ
+    C      ПЕРЕСЧЕТ НА СЛЕДУЮЩУЮ СТУПЕНЬ РЕДУКТОРА
     PRS = U * KPD
     DO 97 I = 1, IT
     RM(I) = RM(I) / U
