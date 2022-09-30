@@ -13,6 +13,7 @@ extern float TQ[20], TC[20], RM[20];
 using namespace std;
 
 extern fstream f_1;    // файл для результата    //***
+extern fstream f_7;    // файл отладки    //***
 
 //========== Переменные по ступени
 extern int IVP;                             // тип ступени
@@ -71,6 +72,7 @@ void TABLP1(float Z[2], int KST[3], int KST4, int KST5, float DLTH[2], float W[2
 
 
 	cout << "TABLP1" << endl;
+	f_7 << "TABLP1" << endl;
 
 	DOP1L(MN, D, KST, IST4, IST5, FR, EHS, TH, EWS1, EWS2, EWS, TWM, TW, ECS, TC_);
 
@@ -91,6 +93,8 @@ void TABLP1(float Z[2], int KST[3], int KST4, int KST5, float DLTH[2], float W[2
 
 	sprintf(FILNAM, "TABL%d.txt", IS);
 	f_3.open(FILNAM, fstream::out);
+
+	f_7 << "TABLP1:   IS = " << IS << endl;
 	
 	f_3 << "ИДЕНТИФИКАТОР РАСЧЕТА - " << IR; 
 	for (int i = 0; i < 20 - strlen(IR); i++) f_3 << " ";

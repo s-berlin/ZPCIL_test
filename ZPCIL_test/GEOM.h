@@ -22,6 +22,7 @@ extern float T1R, TMAX;     // ЛНЛЕМР МЮ БУНДЪЫЕЛ БЮКС, мЛ
 extern float TQ[20], TC[20], RM[20];
 
 extern fstream f_1;    // ТЮИК ДКЪ ПЕГСКЭРЮРЮ    //***
+extern fstream f_7;    // ТЮИК НРКЮДЙХ //***
 
 //========== оЕПЕЛЕММШЕ ОН ЯРСОЕМХ
 extern int IVP;                             // РХО ЯРСОЕМХ
@@ -65,7 +66,7 @@ void GEOM(int NW)
     float DLTHMN[2] = {}, DLTHMX[2] = {};
     float W[2] = {};
 
-    float EPBET, EPGAM, BETB, EPAM;
+    float EPBET = 0, EPGAM = 0, BETB = 0, EPAM = 0;
     double PI = 3.1415927;
     int KST[3] = {0,0,0};
     float Z[2] = {0,0};
@@ -143,12 +144,14 @@ void GEOM(int NW)
         SCT(ALFTW, SNATW, CSATW, TGATW);
         AW = static_cast<float>(ZS * MN * CSAT / (2. * CSB * CSATW));
         
-        f_1 <<     "\nлефняебне пюяярнъмхе                       AW " << setw(13) << AW;
+        f_1 <<     "\nлефняебне пюяярнъмхе                       AW " << setw(10) << AW;
 
         ZPRGMS(ALFTW, GRM, SEC);
         if (IPR >= 3) {
-            f_1 << "\nоепедюрнвмне вхякн                          U " << setw(13) << UU;
-            f_1 << "\nсцнк гюжеокемхъ (цпюд.лхм.яей)          ALFTW " << setprecision(2) << fixed << setw(15) << GRM << "." << setw(2) << SEC << endl;
+            f_1 << "\nоепедюрнвмне вхякн                          U " << setw(10) << UU;
+            f_1 << "\nсцнк гюжеокемхъ (цпюд.лхм.яей)          ALFTW " << setprecision(2) << fixed << setw(8) << GRM << ".";
+            if (SEC < 10) f_1 << "0" << SEC << endl;
+            else f_1 << SEC << endl; 
         }
      }
     else {   // ЕЯКХ AW МЕ ПЮБМН 0
@@ -161,16 +164,16 @@ void GEOM(int NW)
         IDXS = 0;
         cout << "\nGEOM: XS = " << XS << "    X[0] = " << X[0] << "    X[1] = " << X[1] << "    X1 = " << X1 << "    X2 = " << X2 << endl;
 
-        if (flaw == 0) f_1 << "\nлефняебне пюяярнъмхе                 AW " << setw(14) << AW;
+        if (flaw == 0) f_1 << "\nлефняебне пюяярнъмхе                 AW " << setw(10) << AW;
      //   if (flaw > 0)  
-            f_1 <<            "\nйнщттхжхемр ясллш ялеыемхи           XS " << setw(14) << round(XS * 1000) / 1000;
+            f_1 <<            "\nйнщттхжхемр ясллш ялеыемхи           XS " << setw(10) << round(XS * 1000) / 1000;
      
         if (X1 > -5.) X[1] = XS - X1;
         else {
             if (X2 > -5) X[0] = XS - X2;
             else {
                 if (XS < -0.5 || XS > 2) {
-                    f_1 << "\nйнщттхжхемр ясллш ялеыемхи            XS " << setw(14) << round(XS * 1000) / 1000 << endl;
+                    f_1 << "\nйнщттхжхемр ясллш ялеыемхи            XS " << setw(10) << round(XS * 1000) / 1000 << endl;
                     f_1 << " (БМЕ ДНОСЯРХЛШУ ОПЕДЕКНБ)" << endl;
                     f_1 << "\nПЮГАХБЙЮ ЙНЩТ. ЯСЛЛШ ЯЛЕЫЕМХИ МЕ ОПНХГБНДХРЯЪ      " << endl;
                     f_1 << "\nпюявер опейпюыем" << endl;
@@ -190,17 +193,24 @@ void GEOM(int NW)
         ALFTW = atan(TGATW);
         ZPRGMS(ALFTW, GRM, SEC);
         if (IPR >= 3) {
-            f_1 << "\nоепедюрнвмне вхякн                    U " << setw(14) << UU;
-            f_1 << "\nсцнк гюжеокемхъ (цпюд.лхм.яей)    ALFTW " << setprecision(2) << fixed << setw(13) << GRM << "." << SEC << endl;
+            f_1 << "\nоепедюрнвмне вхякн                    U " << setw(10) << UU;
+            f_1 << "\nсцнк гюжеокемхъ (цпюд.лхм.яей)    ALFTW " << setprecision(2) << fixed << setw(8) << GRM << ".";
+            if (SEC < 10) f_1 << "0" << SEC << endl;
+            else f_1 << SEC << endl;
         }
    
     }
+    cout << "GEOM ===== U = " << U << endl;
+    f_7 << "GEOM ===== U = " << U << endl;
+
     if (U >= 1) {
         DW[0] = static_cast<float>(2. * AW / (U + 1.));
         DW[1] = static_cast<float>(2. * AW * U / (U + 1.));
         A = static_cast<float>(0.5 * ZS * MN / CSB);
         float Y = (AW - A) / MN;
         float DELY = XS - Y;
+
+        f_7 << "GEOM ===== DELY = " << DELY << endl;
 
         for (int i = 0; i < 2; i++) {
             D[i] = Z[i] * MN / CSB;
@@ -212,6 +222,7 @@ void GEOM(int NW)
             TGAA[i] = sqrt(DA[i] * DA[i] - DB[i] * DB[i]) / DB[i];
             EA[i] = static_cast<float>((Z[i] * (TGAA[i] - TGATW) / (2 * PI)));
             HZ = (DA[i] - DF[i]) / 2;
+            f_7 << "GEOM ===== HZ = " << HZ << endl;
         }
         f_1 << "\nдекхрекэмше дхюлерпш                  D " << setprecision(3) << fixed << setw(10) << D[0] << setw(10) << D[1];
         f_1 << "\nмювюкэмше дхюлерпш                   DW " << setw(10) << DW[0] << setw(10) << DW[1];
@@ -254,13 +265,13 @@ void GEOM(int NW)
 
         if (SNA[0] <= 0 && IPR > 6) f_1 << "\n   гAOCTPEHхE гсаю ьеярепмх   SNA1 = " << SNA[0];
         if (SNA[0] > 0 && SNA[0] < 0.3 && IPR > 6) {
-            f_1 << "\n   мнплюкэмюъ рнкыхмю гсаю ьеярепмх мю онбепумнярх " << SNA[0];
+            f_1 << "\n   мнплюкэмюъ рнкыхмю гсаю ьеярепмх мю онбепумнярх ";
             f_1 << "\n   бепьхм (б днкъу лндскъ)  SNA1 = " << SNA[0] << " лемэье  0.3";
         }
 
         if (SNA[1] <= 0 && IPR > 6) f_1 << "\n   гAOCTPEHхE гсаю йнкеяю   SNA2 = " << SNA[1];
         if (SNA[1] > 0 && SNA[1] < 0.3 && IPR > 6) {
-            f_1 << "\n   мнплюкэмюъ рнкыхмю гсаю йнкеяю мю онбепумнярх " << SNA[1];
+            f_1 << "\n   мнплюкэмюъ рнкыхмю гсаю йнкеяю мю онбепумнярх ";
             f_1 << "\n   бепьхм (б днкъу лндскъ)  SNA2 = " << SNA[1] << " лемэье  0.3";
         }
         
@@ -297,9 +308,12 @@ void GEOM(int NW)
 
 
         }
-        int II = CNT1(X, XMIN, DL, DP, SNA, EPALF, EPBET, EPGAM);  extern float BE;     //  KOHTPOкэ KAвECTBA гюжеокемхъ
+        int II = CNT1(X, XMIN, DL, DP, SNA, EPALF, EPBET, EPGAM);  //extern float BE;     //  KOHTPOкэ KAвECTBA гюжеокемхъ
      
         cout << "GEOM: after CNT1:  II = " << II << "   EPALF = " << EPALF << "   EPBET = " << EPBET << endl;  // НПЦЮМХГНБЮРЭ ОПЕПШБШБЮМХЕ, ЕЯКХ II == 3:    IF(II.EQ.3)  GOTO 61
+        f_7 << "GEOM: after CNT1:  II = " << II << "   EPALF = " << EPALF << "   EPBET = " << EPBET << "   IPR = " << IPR << "   II = " << II << endl;  // НПЦЮМХГНБЮРЭ ОПЕПШБШБЮМХЕ, ЕЯКХ II == 3:    IF(II.EQ.3)  GOTO 61
+        if (II == 3) f_7 << "GEOM:   оКНУНЕ ЙЮВЕЯРБН ГЮЖЕОКЕМХЪ. рЮАКХЖЮ ОЮПЮЛЕРПНБ МЕ БШБНДХРЯЪ." << endl;  // НПЦЮМХГНБЮРЭ ОПЕПШБШБЮМХЕ, ЕЯКХ II == 3:    IF(II.EQ.3)  GOTO 61
+        
         if (II != 3) {
             for (int i = 0; i < 2; i++) {
                 SC[i] = static_cast<float>((PI * CSAL * CSAL / 2 + X[i] * sin(2 * ALF)) * MN);

@@ -8,7 +8,7 @@ float AKHBT(int KC, float PSIBD, int KH)
                         .78, .83, .417, .583, .267, .111,  .167, .111, .113,  .077,  .0388, .0812, .0304,  .0396 };
 
     int j = (KC - 1) * 2 + 1;
-    float AKHBT = 1. + AB[KH - 1][j - 1] * PSIBD + AB[KH - 1][j] * (PSIBD * PSIBD);
+    float AKHBT = static_cast < float>(1. + AB[KH - 1][j - 1] * PSIBD + AB[KH - 1][j] * pow(PSIBD, 2));
     return AKHBT;
 }
 

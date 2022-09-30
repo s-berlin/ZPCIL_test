@@ -21,6 +21,7 @@ extern float T1R, TMAX;     // момент на входящем валу, Нм
 extern float TQ[20], TC[20], RM[20];
 
 extern fstream f_1;    // файл для результата    //***
+extern fstream f_7;    // файл отладки //***
 
 //========== Переменные по ступени
 extern int IVP;                             // тип ступени
@@ -698,6 +699,7 @@ void IZGIBU(float SGN, int INW, float DTC, float A0, float KNR, float P,
     float VR = PI * D1 * RM[IRS[0]] / 6.E4;
 
     cout << "IZGIBU before PRCPI     VR =  " << VR << "     IVR = " << IVR << endl;
+    f_7 << "IZGIBU before PRCPI     VR =  " << VR << "     IVR = " << IVR << endl;
     cout << "IZGIBU before PRCPI    SIGF[0] =  " << SIGF[0] << "     SIGF[1] = " << SIGF[1] << endl;
 
 

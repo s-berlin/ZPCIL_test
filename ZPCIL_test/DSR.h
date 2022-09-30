@@ -7,6 +7,8 @@
 
 using namespace std;
 
+extern fstream f_2;    // файл исходных данных для ступеней //***
+
 //========== Переменные по ступени
 extern int IVP;                             // тип ступени
 extern float Z1, Z2;                          // числа зубьев шестерни и колеса
@@ -28,91 +30,96 @@ extern float CZ1, CZ2, KSP, KPD, PR;        // числа зацеплений за оборот шестер
 extern float LO, S1, FKE, GM;               // расстояние между опорами, расстояние от опоры со стороны подвода момента до центра шестерни, ?, ?
 extern int IQ, IP, IZ1, IG;                 // тип приложения момента, тип подшипника, ?, ?
 
+//extern int IS;
+
 void  DSR() 
 {
     string str;
     char ch = ' ';
     int i = 0;
-    fstream fi;
+    //fstream fi;
 
     cout << "DSR" << endl;
     
-    fi.open("FILE2", fstream::in);
+    //fi.open("FILE2", fstream::in);
+    /*
+    if (IS == 1) {
+        getline(f_2, str);  // пропустить строку
+        cout << str << endl;
+        getline(f_2, str);  // пропустить строку
+        cout << str << endl;
 
-    getline(fi, str);  // пропустить строку
-    cout << str << endl;
-    getline(fi, str);  // пропустить строку
-    cout << str << endl;
-
-    fi >> IVP;	                                            // идентификатор расчета
+        f_2 >> IVP;
+    }
+    */
     cout << "DSR: IVP = " << IVP << endl;
 
-    getline(fi, str);  // пропустить строку
-    getline(fi, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
     cout << str << endl;
 
-    fi >> Z1 >> Z2 >> MN >> BE;
+    f_2 >> Z1 >> Z2 >> MN >> BE;
     cout << "      " << Z1 << "      " << Z2 << "      " << MN << "      " << BE << endl;
     
-    getline(fi, str);  // пропустить строку
-    getline(fi, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
     cout << str << endl;
 
-    fi >> flaw >> AW >> X1 >> X2 >> B1 >> B2 >> AL >> HA >> HL >> CZV;
+    f_2 >> flaw >> AW >> X1 >> X2 >> B1 >> B2 >> AL >> HA >> HL >> CZV;
     cout << "     " << flaw << "   " << AW << "  " << X1 << "     " << X2 << "      " << B1;
     cout << "      " << B2 << "     " << AL << "      " << HA << "     " << HL << "    " << CZV << endl;
 
-    getline(fi, str);  // пропустить строку
-    getline(fi, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
     cout << str << endl;
 
-    fi >> IMD >> IST1 >> IST2 >> IST3 >> IST4 >> IST5;
+    f_2 >> IMD >> IST1 >> IST2 >> IST3 >> IST4 >> IST5;
     cout << "      " << IMD << "      " << IST1 << "       " << IST2 << "       " << IST3 << "       " << IST4 << "       " << IST5 << endl;
 
-    getline(fi, str);  // пропустить строку
-    getline(fi, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
     cout << str << endl;
 
-    fi >> IKG;
+    f_2 >> IKG;
     cout << "      " << IKG << endl;
 
-    getline(fi, str);  // пропустить строку
-    getline(fi, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
     cout << str << endl;
 
-    fi >> CZ1 >> CZ2 >> GM >> IVR >> PR >> KPD >> KSP;
+    f_2 >> CZ1 >> CZ2 >> GM >> IVR >> PR >> KPD >> KSP;
     cout << "      " << CZ1 << "      " << CZ2 << "        " << GM << "      " << IVR << "     " << PR << "    " << KPD << "     " << KSP << endl;
 
-    getline(fi, str);  // пропустить строку
-    getline(fi, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
     cout << str << endl;
 
-    fi >> SHLM1 >> SHPM1 >>SFLB1>> SFPM1;
+    f_2 >> SHLM1 >> SHPM1 >>SFLB1>> SFPM1;
     cout << "      " << SHLM1 << "       " << SHPM1 << "        " << SFLB1 << "        " << SFPM1  << endl;
 
-    getline(fi, str);  // пропустить строку
-    getline(fi, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
     cout << str << endl;
 
-    fi >> IG1 >> H1 >> HK1 >> HT1 >> SHER1 >> YZ1 >> YT1 >> YR1 >> IMF1 >> SHV1;
+    f_2 >> IG1 >> H1 >> HK1 >> HT1 >> SHER1 >> YZ1 >> YT1 >> YR1 >> IMF1 >> SHV1;
     cout << "      " << IG1 << "       " << H1 << "     " << HK1 << "      " << HT1 << "    " << SHER1 << "      " << YZ1 << "       " << YT1 << "       " << YR1 << "     " << IMF1 << "     " << SHV1 << endl;
 
-    getline(fi, str);  // пропустить строку
-    getline(fi, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
     cout << str << endl;
 
-    fi >> SHLM2 >> SHPM2 >> SFLB2 >> SFPM2;
+    f_2 >> SHLM2 >> SHPM2 >> SFLB2 >> SFPM2;
     cout << "      " << SHLM2 << "       " << SHPM2 << "        " << SFLB2 << "        " << SFPM2 << endl;
 
-    getline(fi, str);  // пропустить строку
-    getline(fi, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
+    getline(f_2, str);  // пропустить строку
     cout << str << endl;
 
-    fi >> IG2 >> H2 >> HK2 >> HT2 >> SHER2 >> YZ2 >> YT2 >> YR2 >> IMF2 >> SHV2;
+    f_2 >> IG2 >> H2 >> HK2 >> HT2 >> SHER2 >> YZ2 >> YT2 >> YR2 >> IMF2 >> SHV2;
     cout << "      " << IG2 << "       " << H2 << "     " << HK2 << "      " << HT2 << "    " << SHER2 << "      " << YZ2 << "       " << YT2 << "       " << YR2 << "     " << IMF2 << "     " << SHV2 << endl;
 
 
-    fi.close(); // закрываем файл
+    f_2.close(); // закрываем файл
 };
 
 /*

@@ -48,7 +48,9 @@ void DGKP(int I12, float DB[2], float BETB, float DP[2], float ROP[2], float DL[
 
     if (BE != 0.) {
         f_1 << "\n\nÎÑÅÂÎÉ ØÀÃ                           PX " << setw(14) << PX;
-        f_1 << "\n\nÎÑÍÎÂÍÎÉ ÓÃÎË ÍÀÊËÎÍÀ ËÈÍÈÈ ÇÓÁÀ BETB  " << setprecision(2) << fixed << setw(13) << GRM << "." << setw(2) << SEC << endl;
+        f_1 << "\n\nÎÑÍÎÂÍÎÉ ÓÃÎË ÍÀÊËÎÍÀ ËÈÍÈÈ ÇÓÁÀ BETB  " << setprecision(2) << fixed << setw(13) << GRM << ".";
+        if (SEC < 10) f_1 << "0" << SEC << endl;
+        else f_1 << SEC << endl;
     }
     f_1 << "\nÊÎÝÔÔÈÖÈÅÍÒÛ ÍÎÐÌÀËÜÍÎÉ ÒÎËÙÈÍÛ" << endl;
     f_1 << "ÇÓÁÀ ÍÀ ÏÎÂÅÐÕÍÎÑÒÈ ÂÅÐØÈÍ          SNA " << setprecision(3) << fixed << setw(10) << SNA[0] << setw(10) << SNA[1] << endl;

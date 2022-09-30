@@ -129,7 +129,7 @@ void CILEV(int IS, int IT1, float TQ1[100], float TC1[100], float RM1[100])
 
     //     оепеявер мю якедсчысч ярсоемэ педсйрнпю
 
-    cout << "  IS = " << IS << "  ISR = " << ISR << "  U = " << U << "  KPD = " << KPD << "   IT = " << IT << "  IT1 = " << IT1 << endl;
+    cout << "CILEV:    IS = " << IS << "  ISR = " << ISR << "  U = " << U << "  KPD = " << KPD << "   IT = " << IT << "  IT1 = " << IT1 << endl;
     
     if (IS != ISR) {  
         float PRS = U * KPD;

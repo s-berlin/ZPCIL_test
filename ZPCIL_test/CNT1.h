@@ -3,8 +3,11 @@
 #include <fstream>
 #include <string>
 
+extern fstream f_7;    // ТЮИК НРКЮДЙХ //***
 extern float BE;
+
 //  KOHTPOкэ KAвECTBA гюжеокемхъ
+
 int CNT1(float X[2], float XMIN[2], float DL[2], float DP[2], float SNA[2], float EPALF, float EPBET, float EPGAM)
 {
     int II = 0;
@@ -33,14 +36,16 @@ int CNT1(float X[2], float XMIN[2], float DL[2], float DP[2], float SNA[2], floa
             if (i == 1)  f_1 << "\nгюнярпемхе гсаю йнкеяю:  SNA2 < 0";
         }
     }
-    if (EPALF < 1) {
+    if (EPALF <= 1) {
             f_1 << "\nйнщт.рнпжнбнцн оепейпшрхъ лемэье  1";
             II = 3;
-    }
+    
 
-    if (BE == 0 && EPGAM < 1) {
+        f_7 << "CNT1:     EPGAM = " << EPGAM << endl;
+        if (BE == 0 || EPGAM <= 1) {
             f_1 << "\nясллюпмши йнщт.оепейпшрхъ лемэье  1";
             II = 3;
+        }
     }
     if (II == 3) f_1 << "\nпюявер опейпюыем";
     return II;

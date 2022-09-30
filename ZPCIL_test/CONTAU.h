@@ -33,6 +33,7 @@ extern float T1R, TMAX;     // момент на входящем валу, Нм
 extern float TQ[20], TC[20], RM[20];
 
 extern fstream f_1;    // файл для результата    //***
+extern fstream f_7;    // файл отладки //***
 
 //========== Переменные по ступени
 extern int IVP;                             // тип ступени
@@ -802,6 +803,8 @@ C===================
     cout << "CONTAU: 61     ZN1 = " << ZN1 << "    NHE1 = " << NHE1 << "    II1 = " << II1 << endl;
   
     cout << "CONTAU before PRCPC:    SIGH = " << SIGH << " AU = " << AU << " SHGP = " << SGHP << " SHGP1 = " << SGHP1 << " SHGP2 = " << SGHP2 << "    NHE2 = " << NHE2 << endl;
+    f_7 << "CONTAU before PRCPC:      IVR = " << IVR << endl;
+
     if (IVR <= 2) PRCPC(PH1, PH2, PHM1, PHM2,
         SIGH, SGHP1, SGHP2, SGHP, SHF1, SHF2, SHMF1, SHMF2,
         SIGHM, SGHPM1, SGHPM2,

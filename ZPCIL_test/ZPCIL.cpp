@@ -28,9 +28,13 @@ float TQ[20] = {}, TC[20] = {}, RM[20] = {};
 float TQ1[100] = {}, TC1[100] = {}, RM1[100] = {};
 float TQ2[100] = {}, TC2[100] = {}, RM2[100] = {};
 int IT1, IT2;
-float TN, EV, IS;
+float TN, EV;
+
 
 fstream f_1;    // файл для результата    //***
+fstream f_2;    // файл исходных данных для ступеней //***
+fstream f_7;    // файл отладки //***
+
 
 //========== Переменные по ступени
 int IVP = 0;                         // тип ступени
@@ -60,6 +64,8 @@ float DA1 = 0 , DA2 = 0, DB1 = 0, DB2 = 0, ALFTW = 0;
 
 int main()
 {
+	int IS = 0;
+	float U[5] = {}, KPD[5] = {}, KSP[5] = {};
 	string str;
 	char ch = ' ';
 	int i = 0;
@@ -71,21 +77,45 @@ int main()
 
 	fi >> IS;
 
+	fi.close();
+	cout << "\n\n______________________________________________________________  ZPCIL IS = " << IS << endl;
+
+
     DRM();
+	
+	//------------ - Прочесть U, КПД  и  KSP--------------
+	int J = 0;
+
+	if (IS > 1) {
+		fi.open("TIPST.ACC", fstream::in);
+		for (int i = 0; i < IS; i++) {
+			fi >> J >> U[i] >> KPD[i] >> KSP[i];
+		}		
+		fi.close();
+	}
 	/*
-	C------------ - Прочесть U, КПД  и  KSP--------------
-		IF(IS.GT.1) THEN
-		OPEN(UNIT = 2, FILE = 'TIPST.ACC', STATUS = 'OLD')
-		do 699 I = 1, IS - 1
-			READ(2, *) J, U(I), KPD(I), KSP(I)
-			699		CONTINUE
-			C                READ(2, *)
-			C                READ(2, *) (U(I), I = 1, IS - 1)
-			C		IF(L.NE.0) READ(2, *) (KPD(I), I = 1, IS - 1)
-			C		IF(L.NE.0) READ(2, *) (KSP(I), I = 1, IS - 1)
-			CLOSE(2)
-			END IF
-			*/
+	C------------- Прочесть U , КПД  и  KSP --------------
+	IF (IS.GT.1) THEN
+		OPEN (UNIT=2,FILE='TIPST.ACC',STATUS='OLD')
+				do 699 I=1,IS-1
+		   READ (2,*) J, U(I), KPD(I), KSP(I)
+  699		CONTINUE
+C                READ (2,*)
+C                READ (2,*) (U(I),I=1,IS-1)
+C		IF (L.NE.0) READ (2,*) (KPD(I),I=1,IS-1)
+C		IF (L.NE.0) READ (2,*) (KSP(I),I=1,IS-1)
+		CLOSE (2)
+	END IF
+	*/
+	string FILNAM;
+	if (IS == 1) FILNAM = "OTL1.txt";
+	if (IS == 2) FILNAM = "OTL2.txt";
+	if (IS == 3) FILNAM = "OTL3.txt";
+	if (IS == 4) FILNAM = "OTL4.txt";
+	if (IS == 5) FILNAM = "OTL5.txt";
+	f_7.open(FILNAM, fstream::out);	
+	f_7 << "ZPCIL:          IS = " << IS << endl;
+			
 	VYVDR();
 	
 	/*   матрицы
@@ -139,31 +169,44 @@ C   пpи  L = 0.   считается только  геометpия
 
 	if (IS == 1) cout << "ZPCIL:    Расчет цилиндрических зубчатых передач " << endl;  // ??? IS - не определено!
 
-/*
-C---------- Пересчет нагрузок с учетом U , КПД и KSP предыдущих ступеней
+		// -------------Преобразования циклограммы
+	UPORTQ(IT1, TQ1, TC1, RM1, IT2, TQ2, TC2, RM2, TN, EV, IS);
 
-	IF (IS.GT.1) THEN
-	PRS=1
-	UR=1
-	DO J=1,IS-1
-		PRS=PRS*U(J)*KPD(J)*KSP(J)
-		UR=UR*U(J)
-	END DO
-		DO I=1,IT
-		RM(I)=RM(I)/UR
-		TQ(I)=TQ(I)*PRS
-	END DO
-		DO I=1,IT1
-		RM1(I)=RM1(I)/UR
-			TQ1(I)=TQ1(I)*PRS
-	END DO
-		  TMAX=TMAX*PRS
-		  IF(L.LT.-1.) WH=WH/UR
-	  IF(N1R.GT.1) N1R=N1R/UR
-	END IF
-*/
+//---------- Пересчет нагрузок с учетом U , КПД и KSP предыдущих ступеней
 
+	float PRS = 0, UR = 0;
+	if (IS > 1) {
+		PRS = 1;
+		UR = 1;
+		for (int j = 0; j < IS; j++) {
+			PRS = PRS * U[j] * KPD[j] * KSP[j];
+			UR = UR * U[j];
+		}
+		for (int i = 0; i < IT; i++) {
+			RM[i] = RM[i] / UR;
+			TQ[i] = TQ[i] * PRS;
+		}
+		for (int i = 0; i < IT1; i++) {
+			RM1[i] = RM1[i] / UR;
+			TQ1[i] = TQ1[i] * PRS;
+		}	
+		TMAX = TMAX * PRS;
+		if (L < -1.) WH = WH / UR;
+		if (N1R > 1) N1R = N1R / UR;
+	}
 
+//-----Поиск очередной ступени в file2
+
+	f_2.open("file2", fstream::in);
+	for (int i = 0; i < IS; i++) {
+		for (int j = 0; j < 100; j++){
+			f_2 >> str;
+			cout << "zpcil:  str.substr(0, 3) = " << str.substr(0, 3) << endl;
+		if (str.substr(0, 3) == "IVP") break;
+		else getline(f_2, str);
+		}
+	}
+	f_2 >> IVP;
 /*
 	DO III=1,IS
 	DO II=1,100
@@ -196,13 +239,12 @@ C---------- Расчет цилиндрической передачи внешнего зацепления
 
 //	----------Расчет цилиндрической передачи внешнего зацепления
 // 
-	IVP = 0;
+	//IVP = 0;
 	int JJ = 0;
 	if (IVP == 0) CILEV(IS, IT1, TQ1, TC1, RM1);
-//		IF(IVP.EQ.0)  CALL CILEV(JJ, IR, IVP, IS, ISR, L, WH, TMAX,
-//			*IRV, IPR, IE, N1R, TNZ,
-//			*IT1, TQ1, TC1, RM1, IN, IT, TQ, TC, RM, TN)
 
+	f_2.close();
+	f_7.close();
 	return(0);
 }
 /*

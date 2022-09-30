@@ -1,0 +1,10 @@
+ZPCIL:          IS = 1
+GEOM ===== U = 1.28571
+GEOM ===== DELY = 0.016371
+GEOM ===== HZ = 13.4018
+GEOM ===== HZ = 13.4018
+GEOM: after CNT1:  II = 0   EPALF = 1.3333   EPBET = 2.12207   IPR = 7   II = 0
+TABLP1
+TABLP1:   IS = 1
+CONTAU before PRCPC:      IVR = 0
+IZGIBU before PRCPI     VR =  31.9954     IVR = 0
