@@ -53,7 +53,7 @@ void VYVDR()
     fi >> IS;
     fi.close();
 
-    sprintf(FILNAM, "RESULT%d", IS);
+    sprintf_s(FILNAM, "RESULT%d", IS);
     f_1.open(FILNAM, fstream::out);
   
     int I1 = 1;
@@ -67,7 +67,7 @@ void VYVDR()
 
     if (IS == 1) {
         f_1 << IR;
-        f_1 << "\n" << "                     ÐÀÑ×ÅÒ ÇÓÁ×ÀÒÛÕ ÏÅÐÅÄÀ× ÐÅÄÓÊÒÎÐÀ\n\n";
+        f_1 << "\n" << "                    ÐÀñ÷åò ÇÓÁ×ÀÒÛÕ ÏÅÐÅÄÀ× ÐÅÄÓÊÒÎÐÀ\n\n";
         f_1 << "     ÈÑÕÎÄÍÛÅ ÄÀÍÍÛÅ ÄËß ÐÅÄÓÊÒÎÐÀ\n\n";
 
         if (L > 0) {
@@ -142,7 +142,7 @@ void VYVDR()
     }
     if (IE == 2)  TMAX = TMAX * 9.81;
 
-    cout << "VYVDR:    TQ[0] = " << TQ[0] << endl;
+    cout << "VYVDR :    TQ[0] = " << TQ[0] << endl;
 
     //  IE = 1 èñõ. äàííûå è ðåçóëüòàòû ðàñ÷åòà â CÈ,
     //  IE = 2 èñõ. äàííûå è ðåçóëüòàòû ðàñ÷åòà â TEXH.CÈÑÒÅÌÅ

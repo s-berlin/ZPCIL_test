@@ -91,7 +91,7 @@ void TABLP1(float Z[2], int KST[3], int KST4, int KST5, float DLTH[2], float W[2
 	fi >> IS;
 	fi.close();
 
-	sprintf(FILNAM, "TABL%d.txt", IS);
+	sprintf_s(FILNAM, "TABL%d.txt", IS);
 	f_3.open(FILNAM, fstream::out);
 
 	f_7 << "TABLP1:   IS = " << IS << endl;
